@@ -1,3 +1,5 @@
+from music21 import converter, instrument, note, chord, stream
+
 class MidiDataset(data.Dataset):
   'Characterizes a dataset for PyTorch'
   def __init__(self, qnsf, seq_len=25, cod_type=1, midi_files=[],silence=1):
@@ -10,8 +12,6 @@ class MidiDataset(data.Dataset):
         self.cod_type = cod_type
         self.midi_source = midi_files
         
-
-
   def __len__(self):
         'Denotes the total number of samples'
         return len(self.notes) - self.seq_len*2
