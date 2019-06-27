@@ -61,7 +61,7 @@ class MidiDataset(data.Dataset):
           Each Row represents a subdivision of a quarter lenght. Each column represents a pitch.
           with cod_type=2, every pitch is duplicated in order to distiguish between start pressing the key and sustaining it
           '''
-          length=int(notes_to_parse[-1].offset*qnsf)+1 #count number subdivisions
+          length=int(notes_to_parse[-1].offset*qnsf)+1 #count number subdivisions. Offset is the position (counted on quarter notes) of the event
           notes_song=np.zeros((length,88*cod_type))
           
           
