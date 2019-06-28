@@ -1,0 +1,3 @@
+!curl http://imanmalik.com/assets/dataset/TPD.zip -o TPD.zip
+!mkdir TPDData
+!unzip TPD.zip -d TPDData
