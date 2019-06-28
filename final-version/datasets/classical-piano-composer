@@ -1,0 +1,4 @@
+#Clone the original git, just for the dataset (I think is base on Final Fantasy scores...)
+!git clone https://github.com/Skuldur/Classical-Piano-Composer.git
+
+#It also helps with the directories
