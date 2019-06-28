@@ -1,4 +1,3 @@
-
 '''
 Authors:     Ferran Carrascosa, Oscar Casanovas, Alessandro Pintaudi, Martí Pomés 
 Project:    AIDL Music Group
@@ -96,5 +95,3 @@ def list_midi_files(midi_source, data_len_train, data_len_val , data_len_test, r
     
   
   return midi_files_sel[:data_len_train], midi_files_sel[data_len_train:(data_len_train + data_len_val)], midi_files_sel[(data_len_train + data_len_val):]
-
-
