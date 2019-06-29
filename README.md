@@ -1,6 +1,9 @@
 # music-generation
 AIDL music generation
 
+## Here the original file with testing results and graphs (not visible in this ReadMe)
+https://www.notion.so/aidlmusic/ReadMe-014338557385464a9ede62b3dd04a29b#6ad6da2ba64445dfb43464bac25e5bce
+
 # Task Definition
 
 This project presents the implementation of a basic MIDI compositions generation system while we learn about the implementation of 3 different Neural Network models (LSTM Seq2One with Keras, LSTM Seq2One with PyTorch, LSTM Seq2Seq with PyTorch). We also learn on how to train a Network using Google Compute Engine and provide an overview of the current State of the Art on Music Generation using Deep Learning as well as other simpler but very interesting individual projects.
