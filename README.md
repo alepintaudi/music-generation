@@ -286,7 +286,7 @@ A similar behaviour can be observed for the learning curves of accuracy, where f
 
 ### Example of output
 
-TBD
+[https://www.notion.so/014338557385464a9ede62b3dd04a29b#be15dddf95c8466385221d61c0c0e36c](https://www.notion.so/014338557385464a9ede62b3dd04a29b#be15dddf95c8466385221d61c0c0e36c)
 
 ### Conclusions of the Experiment
 
@@ -391,7 +391,7 @@ After training the system with training and validation dataset and using the res
 
 ### Example of output
 
-TBD
+[https://www.notion.so/014338557385464a9ede62b3dd04a29b#27d52bd5d00c46149deb15496f90b7d9](https://www.notion.so/014338557385464a9ede62b3dd04a29b#27d52bd5d00c46149deb15496f90b7d9)
 
 ### Conclusions of the Experiment
 
