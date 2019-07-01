@@ -18,6 +18,7 @@ class Seq2Seq(nn.Module):
       self.thr=thr
       self.input_dim=input_dim
       self.rnn_dim=rnn_dim
+      self.rnn_layers=rnn_layers
       
       self.encoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
       self.decoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
@@ -32,21 +33,6 @@ class Seq2Seq(nn.Module):
       
       self.soft = nn.Softmax()
       
-  def forward3(self, x,y):          
-
-      output, (hn, cn) = self.encoder(x)
-
-      output, (hn, cn) = self.decoder(y, (hn,cn))
-      
-      shape = output.shape
-
-      y_pred=output.unsqueeze(2)
-      
-      y_pred = self.classifier(y_pred)
-      
-      y_pred = y_pred.view(shape[0],shape[1],-1)
-
-      return y_pred
 
     # https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
   def forward(self, x,y,teacher_forcing_ratio = 0.5):          
@@ -86,7 +72,7 @@ class Seq2Seq(nn.Module):
 
       return self.loss_function(x,y_pred)
 
-  def focal_loss(self, x, y):
+  def focal_loss(self, x, y, alpha = 0.5, gamma=2.0):
         '''Focal loss.
         Args:
           x: (tensor) sized [batch_size, n_forecast, n_classes(or n_levels)].
@@ -94,8 +80,6 @@ class Seq2Seq(nn.Module):
         Return:
           (tensor) focal loss.
         '''
-        alpha = 0.5
-        gamma = 2.0
         
         x = x.view(-1,x.shape[2])
         y = y.view(-1,y.shape[2])
@@ -108,9 +92,13 @@ class Seq2Seq(nn.Module):
         w = w * (1-pt).pow(gamma)
         return F.binary_cross_entropy_with_logits(x, t, w, reduction='sum')
   
-  def accuracy(self,x,y):
+  def recall(self,x,y):
       x_pred = (x > self.thr).long() #if BCELoss expects sigmoid -> th 0.5, BCELossWithLogits expect real values -> th 0.0
       return torch.mul(x_pred.float(),y).float().sum()/y.sum()
+    
+  def precision(self,x,y):
+      x_pred = (x > self.thr).long() #if BCELoss expects sigmoid -> th 0.5, BCELossWithLogits expect real values -> th 0.0
+      return torch.mul(x_pred.float(),y).float().sum()/x_pred.float().sum()
   
   def accuracy_old(self, x, y):
       #flatten
@@ -118,12 +106,15 @@ class Seq2Seq(nn.Module):
       y_pred = y.argmax(dim=1)
       return (x_pred == y_pred).float().mean()
   
-  def init_hidden_predict(self):
-        
+  def zero_init_hidden_predict(self):
+    
       # initialize the hidden state and the cell state to zeros
       # batch size is 1
       return (torch.zeros(2,1, self.rnn_dim),torch.zeros(2,1, self.rnn_dim))
   
+  def random_init_hidden_predict(self):
+      
+      return (torch.randn(self.rnn_layers,1, self.rnn_dim),torch.randn(self.rnn_layers,1, self.rnn_dim))
   
   def predict(self,seq_len=500):
 
@@ -141,21 +132,16 @@ class Seq2Seq(nn.Module):
 
             output, (hn, cn) = self.decoder(seq[0,t].view(1,1,-1),(hn,cn))
             
-            output = self.classifier(output)
+            shape = output.shape
+          
+            x=output.unsqueeze(2)
             
-            seq[0,t+1]=output>self.thr
-            '''
-            output = F.softmax(output, dim=2)
+            x = self.classifier(x) #no hace falta la softmax
+
+            x = x.view(shape[0],shape[1],-1)
+
+            output = (x > self.thr).float()
             
-            p, top_notes = output.topk(top)
+            seq[:,t,:] = output.view(shape[0],-1)
             
-            
-            if 0 in top_notes:
-                seq[0,t+1,0]=1.0
-            else:
-                top_notes = top_notes.squeeze().cpu().numpy()
-                p = p.detach().squeeze().cpu().numpy()
-                seq[0,t+1,np.random.choice(top_notes, p = p/p.sum())]=1.0
-                print(seq[0,t+1,np.random.choice(top_notes, p = p/p.sum())])
-            '''
-        return seq[0,1:,:]
+        return seq[0][1:][:]
