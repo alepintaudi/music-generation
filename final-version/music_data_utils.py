@@ -1,6 +1,24 @@
+'''
+functions and classes:
+MidiDataset = Torch data loader. Transforms a list of midi files (midi_files) into a pytorch dataloader
+list_midi_files = Given a source folder and the number of Train, Validation and test cases that you want, it will return a list of midis for each category
+
+extra info about libraries:
+music21 = Open source toolkit. Used to extract midi files into a Python understandable, event-based syntaxis. (https://web.mit.edu/music21/doc/)
+'''
+
+import glob
+import pickle
+import numpy as np
+from music21 import converter, instrument, note, chord, stream
+
+from os import walk
+import random
+from torch.utils import data
+
 class MidiDataset(data.Dataset):
   'Characterizes a dataset for PyTorch'
-  def __init__(self, qnsf, seq_len=25, cod_type=1, midi_files=[]):
+  def __init__(self, qnsf, seq_len=25, cod_type=2, midi_files=[]):
         'Initialization'
         if cod_type !=1 and cod_type !=2:  
           raise TypeError("cod_type is not 1 (88 notes) or 2 (176 notes)")
