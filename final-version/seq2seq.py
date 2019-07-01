@@ -9,8 +9,8 @@ from torchvision import datasets, transforms
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils import data
- 
-torch.save(model, 'models/model_def_30songs.pt')
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Seq2Seq(nn.Module):
   def __init__(self, input_dim, rnn_dim=512, rnn_layers=2, thr=0):
@@ -90,6 +90,48 @@ class Seq2Seq(nn.Module):
   def precision(self,x,y):
       x_pred = (x > self.thr).long() #if BCELoss expects sigmoid -> th 0.5, BCELossWithLogits expect real values -> th 0.0
       return torch.mul(x_pred.float(),y).float().sum()/x_pred.float().sum()
+    
+  def train(self,training_generator,learning_rate=1e-4,epochs=25, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.5, focal_gamma=2.0):
+      #define optimizer
+      optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+      
+      loss_train=[]
+      recall_train=[]
+      precision_train=[]
+      density_train=[]
+
+      for epoch in range(epochs):
+          for i,batch in enumerate(training_generator):
+              # Forward pass: Compute predicted y by passing x to the model
+              x = batch[0]
+              y = batch[1]
+              x= x.to(device)
+              y= y.to(device)
+
+              y_pred = model.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/EPOCHS)**2)
+
+              # Compute and print loss
+              loss = model.focal_loss(y_pred, y, focal_alpha=0.75, focal_gamma=2.0)
+              recall  = model.recall(y_pred, y)
+              precision = model.precision(y_pred, y)
+
+              # Zero gradients, perform a backward pass, and update the weights.
+              optimizer.zero_grad()
+              loss.backward()
+              optimizer.step()
+
+          loss_train.append(loss.item())
+
+          #how many of the notes on the composition where predicted
+          recall_train.append(recall.item())
+
+          #how many of the notes predicted followed the composition
+          precision_train.appen(precision.item())
+
+          #represents the density of the pianoroll. Good values for 176 (COD_TYPE=2) 4 voices tend to be arround 0.025
+          density_train.append((y_pred>model.thr).float().mean())
+
+          print(epoch, loss_train[epoch], recall_train[epoch], precision_train[epoch], density_train[epoch])
   
   def accuracy_old(self, x, y):
       #flatten
