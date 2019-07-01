@@ -1,3 +1,16 @@
+
+'''
+
+'''
+import numpy as np
+import torch
+import torch.nn as nn
+from torchvision import datasets, transforms
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils import data
+
+
 class Seq2Seq(nn.Module):
   def __init__(self, input_dim, rnn_dim=512, rnn_layers=2, thr=0):
       super(Seq2Seq, self).__init__()
