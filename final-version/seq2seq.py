@@ -9,7 +9,8 @@ from torchvision import datasets, transforms
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils import data
-
+ 
+torch.save(model, 'models/model_def_30songs.pt')
 
 class Seq2Seq(nn.Module):
   def __init__(self, input_dim, rnn_dim=512, rnn_layers=2, thr=0):
@@ -29,10 +30,7 @@ class Seq2Seq(nn.Module):
           nn.Linear(256, input_dim)
       )
 
-      self.loss_function = nn.BCEWithLogitsLoss() #combina logsoftmax y NLLLoss
-      
-      self.soft = nn.Softmax()
-      
+      self.loss_function = nn.BCEWithLogitsLoss() #combines logsoftmax with NLLLoss
 
     # https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
   def forward(self, x,y,teacher_forcing_ratio = 0.5):          
@@ -66,20 +64,13 @@ class Seq2Seq(nn.Module):
 
       return outputs
 
-  def loss(self, x,y):
+  def loss(self, x,y): #Standard BCE loss
       x = x.view(-1,x.shape[2])
       y_pred = y.view(-1,y.shape[2])
 
       return self.loss_function(x,y_pred)
 
-  def focal_loss(self, x, y, alpha = 0.5, gamma=2.0):
-        '''Focal loss.
-        Args:
-          x: (tensor) sized [batch_size, n_forecast, n_classes(or n_levels)].
-          y: (tensor) sized like x.
-        Return:
-          (tensor) focal loss.
-        '''
+  def focal_loss(self, x, y, alpha = 0.5, gamma=2.0): #BCE with focal loss
         
         x = x.view(-1,x.shape[2])
         y = y.view(-1,y.shape[2])
@@ -116,13 +107,17 @@ class Seq2Seq(nn.Module):
       
       return (torch.randn(self.rnn_layers,1, self.rnn_dim),torch.randn(self.rnn_layers,1, self.rnn_dim))
   
-  def predict(self,seq_len=500):
-
+  def predict(self,seq_len=500,hidden_init="zeros"):
+        
+        assert hidden_init=="zeros" or hidden_init=="random", "hidden_init can only take values 'zeros' or 'random'"
         self.eval()
         
         seq = torch.zeros(1,seq_len+1,self.input_dim).to(device)
         
-        hn,cn=self.init_hidden_predict()
+        if hidden_init=="zeros":
+            hn,cn=self.zero_init_hidden_predict()
+        else:
+            hn,cn=self.random_init_hidden_predict()    
         hn=hn.to(device)
         cn=cn.to(device)
         
