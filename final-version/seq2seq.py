@@ -108,7 +108,7 @@ class Seq2Seq(nn.Module):
               x= x.to(device)
               y= y.to(device)
 
-              y_pred = self.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/EPOCHS)**2)
+              y_pred = self.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/epochs)**2)
 
               # Compute and print loss
               loss = self.focal_loss(y_pred, y, focal_alpha=0.75, focal_gamma=2.0)
