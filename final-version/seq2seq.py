@@ -93,7 +93,7 @@ class Seq2Seq(nn.Module):
       x_pred = (x > self.thr).long() #if BCELoss expects sigmoid -> th 0.5, BCELossWithLogits expect real values -> th 0.0
       return torch.mul(x_pred.float(),y).float().sum()/x_pred.float().sum()
     
-  def training_focal(self,training_generator,learning_rate=1e-4,epochs=25, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.5, focal_gamma=2.0):
+  def training_focal(self,training_generator,learning_rate=1e-4,epochs=25, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0):
       #define optimizer
       optimizer = torch.optim.Adam(self.parameters(), lr=learning_rate)
       
@@ -113,7 +113,7 @@ class Seq2Seq(nn.Module):
               y_pred = self.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/epochs)**2)
 
               # Compute and print loss
-              loss = self.focal_loss(y_pred, y, focal_alpha=0.75, focal_gamma=2.0)
+              loss = self.focal_loss(y_pred, y, alpha=focal_alpha, gamma=focal_gamma)
               recall  = self.recall(y_pred, y)
               precision = self.precision(y_pred, y)
 
