@@ -93,7 +93,7 @@ class Seq2Seq(nn.Module):
     
   def train(self,training_generator,learning_rate=1e-4,epochs=25, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.5, focal_gamma=2.0):
       #define optimizer
-      optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+      optimizer = torch.optim.Adam(self.parameters(), lr=learning_rate)
       
       loss_train=[]
       recall_train=[]
@@ -108,12 +108,12 @@ class Seq2Seq(nn.Module):
               x= x.to(device)
               y= y.to(device)
 
-              y_pred = model.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/EPOCHS)**2)
+              y_pred = self.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/EPOCHS)**2)
 
               # Compute and print loss
-              loss = model.focal_loss(y_pred, y, focal_alpha=0.75, focal_gamma=2.0)
-              recall  = model.recall(y_pred, y)
-              precision = model.precision(y_pred, y)
+              loss = self.focal_loss(y_pred, y, focal_alpha=0.75, focal_gamma=2.0)
+              recall  = self.recall(y_pred, y)
+              precision = self.precision(y_pred, y)
 
               # Zero gradients, perform a backward pass, and update the weights.
               optimizer.zero_grad()
@@ -129,7 +129,7 @@ class Seq2Seq(nn.Module):
           precision_train.appen(precision.item())
 
           #represents the density of the pianoroll. Good values for 176 (COD_TYPE=2) 4 voices tend to be arround 0.025
-          density_train.append((y_pred>model.thr).float().mean())
+          density_train.append((y_pred>self.thr).float().mean().item())
 
           print(epoch, loss_train[epoch], recall_train[epoch], precision_train[epoch], density_train[epoch])
   
