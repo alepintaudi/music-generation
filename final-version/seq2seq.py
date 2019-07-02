@@ -62,23 +62,30 @@ class Seq2Seq(nn.Module):
       # initializing the output to zeros.
       input = y[:,0,:].view(y.shape[0],1,y.shape[2])
 
+      # we generate iteratively the future time steps selecting th real o predicted note based on a random scheme 
+      # conditioned to teacher_forcing_ratio value: 1 is 100% teacher forcing, 0 only predicted notes
       for t in range(1, seq_len):
           output, (hn, cn) = self.decoder(input, (hn, cn))
 
-          teacher_force = random.random() < teacher_forcing_ratio
+          teacher_force = random.random() < teacher_forcing_ratio   # teacher forcing draw
           
           shape = output.shape
           
+          # we add one dimension to classify all bacthes at same time
           x=output.unsqueeze(2)
 
-          x = self.classifier(x) #no hace falta la softmax
+          x = self.classifier(x) #softmax is'nt necessary
 
+          # removing the extra dimension
           x = x.view(shape[0],shape[1],-1)
           
+          # applying the threshold to the predicted value
           output = (x > self.thr).float()
           
+          # we choose the predicted or real note for the next iteration based on teacher forcing random draw
           input = (y[:,t,:].view(y.shape[0],1,y.shape[2]) if teacher_force else output.view(y.shape[0],1,y.shape[2]))
           
+          # we accumulate the new note
           outputs[:,t,:] = x.view(y.shape[0],-1)
 
       return outputs
