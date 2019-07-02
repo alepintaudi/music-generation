@@ -19,7 +19,7 @@ def train(model, learning_rate=1e-4):
     
     #define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    %%time
+    
     # init model
 
     loss_train=[]
