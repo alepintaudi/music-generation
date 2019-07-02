@@ -138,7 +138,7 @@ def cleanSeq(x, cod_type):
 
 
 def create_midi(prediction_output, qnsf = 4, cod_type=2, midiOutputFile='test_output.mid'):
-    """ convert the output from the prediction to notes and create a midi file
+    """ convert the output (as a numpy array) from the prediction to notes and create a midi file
         from the notes """
     offset = 0
     output_notes = []
