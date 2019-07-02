@@ -509,16 +509,29 @@ Row results of Loss and Accuracy for both Training and Validation.
 
 **Learning Curves**
 
-***Loss*** 
+**Loss**
 
-[](https://www.notion.so/014338557385464a9ede62b3dd04a29b#5ac33118be134906bc014fd59d15b69a)
+[](https://www.notion.so/014338557385464a9ede62b3dd04a29b#0493b14bf69041b599c72cceea18fa0e)
 
-***Accuracy***
+**Recall and Precision** 
 
-[](https://www.notion.so/014338557385464a9ede62b3dd04a29b#fff1ab52028a47e7a5b3c27aa6f3acc7)
+[](https://www.notion.so/014338557385464a9ede62b3dd04a29b#d85672e5ac01459babeada02873fb282)
 
-### Example of output
+### Example of the output
 
-TBD
+**Test**
 
+[https://www.notion.so/014338557385464a9ede62b3dd04a29b#b5ccd567c4164d25af042518d13d5193](https://www.notion.so/014338557385464a9ede62b3dd04a29b#b5ccd567c4164d25af042518d13d5193)
+
+**Train**
+
+[https://www.notion.so/014338557385464a9ede62b3dd04a29b#5bee853978ee49c0908523869e77e160](https://www.notion.so/014338557385464a9ede62b3dd04a29b#5bee853978ee49c0908523869e77e160)
+
+**Predict #1 - Zeros**
+
+[https://www.notion.so/014338557385464a9ede62b3dd04a29b#289fbf166a484f12a0237453b09a8199](https://www.notion.so/014338557385464a9ede62b3dd04a29b#289fbf166a484f12a0237453b09a8199)
+
+**Predict #2 - Rand**
+
+[https://www.notion.so/014338557385464a9ede62b3dd04a29b#5f5c5d588c64425785f0ef7428f9953a](https://www.notion.so/014338557385464a9ede62b3dd04a29b#5f5c5d588c64425785f0ef7428f9953a)
 ### Conclusions of the Experiment
