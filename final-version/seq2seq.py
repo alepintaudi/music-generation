@@ -151,17 +151,20 @@ class Seq2Seq(nn.Module):
       
       return (torch.randn(self.rnn_layers,1, self.rnn_dim),torch.randn(self.rnn_layers,1, self.rnn_dim))
   
-  def predict(self,seq_len=500,hidden_init="zeros"):
+  def predict(self,seq_len=500,hidden_init="zeros",x_init=torch.zeros(1,1,176).to(device)):
         
-        assert hidden_init=="zeros" or hidden_init=="random", "hidden_init can only take values 'zeros' or 'random'"
+        assert hidden_init=="zeros" or hidden_init=="random" or hidden_init=="guided", "hidden_init can only take values 'zeros', 'random','guided' (in which case you have to provide x_init)"
+ 
         self.eval()
         
         seq = torch.zeros(1,seq_len+1,self.input_dim).to(device)
         
         if hidden_init=="zeros":
             hn,cn=self.zero_init_hidden_predict()
+        elif hidden_init=="random":
+            hn,cn=self.random_init_hidden_predict()
         else:
-            hn,cn=self.random_init_hidden_predict()    
+            output, (hn,cn)=self.encoder(x)
         hn=hn.to(device)
         cn=cn.to(device)
         
