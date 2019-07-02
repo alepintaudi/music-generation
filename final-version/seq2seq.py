@@ -128,7 +128,7 @@ class Seq2Seq(nn.Module):
           recall_train.append(recall.item())
 
           #how many of the notes predicted followed the composition
-          precision_train.appen(precision.item())
+          precision_train.append(precision.item())
 
           #represents the density of the pianoroll. Good values for 176 (COD_TYPE=2) 4 voices tend to be arround 0.025
           density_train.append((y_pred>self.thr).float().mean().item())
