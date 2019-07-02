@@ -9,6 +9,8 @@ from torchvision import datasets, transforms
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils import data
+import random
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
