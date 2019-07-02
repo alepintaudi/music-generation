@@ -63,7 +63,7 @@ For reference, we believe it is also important to mention the following Deep Lea
 Here the various experiments that led us to the final model of music generation. At each step we identified the problems we encountered and tried to find a solution to move forward and get a step closer to the target solution we initially defined: generate a model capable of being trained with music and eventually generate one with similar style. 
 
 ## 1st Experiment
-
+### Motivation
 The way we approached the problem was trying to reproduce what has been done in classical NLP models, in which the text is segmented in small sequences forming a dictionary, used to predict the following sequence of characters. 
 
 Thus we decided to convert MIDI files into text to then pass them through the first developed network, written in Keras.
@@ -177,6 +177,7 @@ Here below an example of the output we have got from the above model:
 Since this model is trained without note duration values, all the notes at the input and output have the same fixed duration. This limitation helps this small network to focus only on learning about harmony but it still does not perform amazingly well harmonically. The first part of this example sounds quite strange even if the ending part of this example sounds much better (closer to a human composition).
 
 ## 2nd Experiment
+### Motivation
 
 The biggest challenge with the second experiment has been transforming a first working model from Keras to Pytorch.
 
@@ -304,15 +305,21 @@ Here the decoder was finally generating a sequence of the same length as the one
 
 ### The Model
 
+### Motivation
+
+In this third experiment we tried to solve the issues found during the second experiment. The biggest problem found previously is the monotony of the generated output sequence (same note repeated over and over), we decided to try to solve it moving towards a more standard Sequence to Sequence network.
+
+Here the decoder was finally generating a sequence of the same length as the one sent to the encoder.
+
+### The Model
+
 **Encoder**
 
-The encoder is made of 2 LSTM layers having 512 neurons each with a dropout layer in between them.
+The encoder is made of 2 LSTM layers having 512 neurons each with a dropout layer in between them. 
 
-A linear transformation is then applied to reduce fdimensionality to 256
+We then have a decoder with a first fully connected layer that reduces dimensionality to 256, and then an activation function and dropout before the final fully connected layer that reduces the dimensionality to the input size of the piano roll.
 
-It follows an activation function used for transforming the summed weighted input from the node into the activation of the node or output for that input.
-
-A dropout layer is then added before applying a Cross Entropy Loss function to the results. 
+Cross-Entropy Loss function is finally applied to the results.
 
     class Seq2Seq(nn.Module):
     def **init**(self, input_dim, rnn_dim=512, rnn_layers=2):
@@ -406,7 +413,9 @@ Yet, although the network is now able to generate a sequence of (more or less) a
 
 ## 4th Experiment
 
-In this forth experiment we tried to improve the previous model, starting by solving its main problem of generating only monophonic music.
+### Motivation
+
+In this fourth experiment we tried to improve the previous model, starting by solving its main problem of generating only monophonic music and providing the right architecture to generate polyphonic music at the output.
 
 ### The Model
 
