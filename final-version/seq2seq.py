@@ -164,7 +164,7 @@ class Seq2Seq(nn.Module):
         elif hidden_init=="random":
             hn,cn=self.random_init_hidden_predict()
         else:
-            output, (hn,cn)=self.encoder(x)
+            output, (hn,cn)=self.encoder(x_init)
         hn=hn.to(device)
         cn=cn.to(device)
         
