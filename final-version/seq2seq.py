@@ -1,6 +1,9 @@
 
 '''
-   We generate a class with the properties and methods to train, evaluate and predict the deep learning netork 
+Authors:     Ferran Carrascosa, Oscar Casanovas, Alessandro Pintaudi, Martí Pomés 
+Project:    AIDL Music Group
+
+We generate a class with the properties and methods to train, evaluate and predict the deep learning netork 
 '''
 import numpy as np
 import torch
