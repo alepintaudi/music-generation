@@ -84,11 +84,17 @@ class MidiDataset(data.Dataset):
 
 
 def list_midi_files(midi_source, data_len_train, data_len_val , data_len_test, randomSeq=True, seed = 666):
+    """ Given a directory with midi files, return a tuple of 3 lists with the filenames for the train, validation and test sets 
+        The funcion can apply some randomeness in the files selection order although it can be reproduced cause of the seed number
+    """
+    
   midi_files_all = []
+  # iterate over all filenames in the midi_Source
   for (dirpath, dirnames, filenames) in walk(midi_source):
     midi_files_all.extend(filenames)
   midi_files_all = [ glob.glob(midi_source+"/"+fi)[0] for fi in midi_files_all if fi.endswith(".mid") ]
   
+  # we apply som randomnes in the midi selection to prevent some systematic dependences between train, validation and test.
   if randomSeq:
     random.seed( seed )
     midi_files_sel = random.sample(midi_files_all, (data_len_train + data_len_val + data_len_test))
@@ -99,6 +105,13 @@ def list_midi_files(midi_source, data_len_train, data_len_val , data_len_test, r
   return midi_files_sel[:data_len_train], midi_files_sel[data_len_train:(data_len_train + data_len_val)], midi_files_sel[(data_len_train + data_len_val):]
 
 def cleanSeq(x, cod_type):
+    """ Given a pianoroll x tith 3 dimensions: batches, timesteps and notes*cod_type, the function returns the
+        corrected pianoroll adapted to the codificacion rules: a one in the odd position (continuation note),
+        has to be precedded in the previous timestep by a one in the even or odd position. If exists, this issue,
+        then we moove this one to the even position. 
+        Another rule is that it can't exist a one in the even and odd position in the same time step. If exists, 
+        then the one in the ood is removed.
+    """
   if cod_type==2:
     # first row correction
     notePos = np.where(x[0,:]==1)[0]        # where are the ones
