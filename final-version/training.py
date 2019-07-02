@@ -62,8 +62,7 @@ Init Model
 '''
 Train Model
 '''
-
-    
+   model.training_focal(training_generator,learning_rate=1e-4,epochs=EPOCHS, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0)
         
     
     
