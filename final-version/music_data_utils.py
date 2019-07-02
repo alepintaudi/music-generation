@@ -1,4 +1,7 @@
 '''
+Authors:     Ferran Carrascosa, Oscar Casanovas, Alessandro Pintaudi, Martí Pomés 
+Project:    AIDL Music Group
+
 functions and classes:
 MidiDataset = Torch data loader. Transforms a list of midi files (midi_files) into a pytorch dataloader
 list_midi_files = Given a source folder and the number of Train, Validation and test cases that you want, it will return a list of midis for each category
