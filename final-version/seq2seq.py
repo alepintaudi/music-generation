@@ -1,6 +1,6 @@
 
 '''
-
+   We generate a class with the properties and methods to train, evaluate and predict the deep learning netork 
 '''
 import numpy as np
 import torch
@@ -12,10 +12,13 @@ from torch.utils import data
 import random
 import matplotlib.pyplot as plt
 
+# device definition that depends on the gpu availability
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Seq2Seq(nn.Module):
+# device definition that depends on the gpu availability
   def __init__(self, input_dim, rnn_dim=512, rnn_layers=2, thr=0):
+# input_dim is the pianoroll size
       super(Seq2Seq, self).__init__()
       
       self.thr=thr
@@ -23,8 +26,10 @@ class Seq2Seq(nn.Module):
       self.rnn_dim=rnn_dim
       self.rnn_layers=rnn_layers
       
+      # encoder decoder definiction based on LSTM with dropout network
       self.encoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
       self.decoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
+      # the clasification is based on two fully conected networks dropout 
       self.classifier = nn.Sequential(
           nn.Linear(rnn_dim, 256),
           nn.ReLU(),
@@ -32,17 +37,29 @@ class Seq2Seq(nn.Module):
           nn.Linear(256, input_dim)
       )
 
+      # loss function
       self.loss_function = nn.BCEWithLogitsLoss() #combines logsoftmax with NLLLoss
 
     # https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
   def forward(self, x,y,teacher_forcing_ratio = 0.5):          
-
+      # Train method with teacher forcing ratio to introduce more or less real notes in the training step
+      
+      # zero padding in the x for the encoder.
+      x0 = torch.zeros(x.shape[0], 1, x.shape[2]).to(device)
+      x = torch.cat([x0,x], dim=1)
+      
       output, (hn, cn) = self.encoder(x)
 
       seq_len = y.shape[1]
 
+      # initializing the output to zeros.
       outputs = torch.zeros(y.shape[0], seq_len, self.input_dim).to(device)
 
+      # zero padding in the y for the decoder
+      y0 = torch.zeros(y.shape[0], 1, y.shape[2]).to(device)
+      y = torch.cat([y0,y], dim=1)
+      
+      # initializing the output to zeros.
       input = y[:,0,:].view(y.shape[0],1,y.shape[2])
 
       for t in range(1, seq_len):
@@ -93,48 +110,6 @@ class Seq2Seq(nn.Module):
       x_pred = (x > self.thr).long() #if BCELoss expects sigmoid -> th 0.5, BCELossWithLogits expect real values -> th 0.0
       return torch.mul(x_pred.float(),y).float().sum()/x_pred.float().sum()
     
-  def training_focal(self,training_generator,learning_rate=1e-4,epochs=25, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0):
-      #define optimizer
-      optimizer = torch.optim.Adam(self.parameters(), lr=learning_rate)
-      
-      loss_train=[]
-      recall_train=[]
-      precision_train=[]
-      density_train=[]
-
-      for epoch in range(epochs):
-          for i,batch in enumerate(training_generator):
-              # Forward pass: Compute predicted y by passing x to the model
-              x = batch[0]
-              y = batch[1]
-              x= x.to(device)
-              y= y.to(device)
-
-              y_pred = self.train()(x,y,teacher_forcing_ratio=teacher_forcing_val*(1-epoch/epochs)**2)
-
-              # Compute and print loss
-              loss = self.focal_loss(y_pred, y, alpha=focal_alpha, gamma=focal_gamma)
-              recall  = self.recall(y_pred, y)
-              precision = self.precision(y_pred, y)
-
-              # Zero gradients, perform a backward pass, and update the weights.
-              optimizer.zero_grad()
-              loss.backward()
-              optimizer.step()
-
-          loss_train.append(loss.item())
-
-          #how many of the notes on the composition where predicted
-          recall_train.append(recall.item())
-
-          #how many of the notes predicted followed the composition
-          precision_train.append(precision.item())
-
-          #represents the density of the pianoroll. Good values for 176 (COD_TYPE=2) 4 voices tend to be arround 0.025
-          density_train.append((y_pred>self.thr).float().mean().item())
-
-          print(epoch, loss_train[epoch], recall_train[epoch], precision_train[epoch], density_train[epoch])
-  
   def accuracy_old(self, x, y):
       #flatten
       x_pred = x.argmax(dim=1)
