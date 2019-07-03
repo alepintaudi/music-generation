@@ -16,7 +16,7 @@ MetaValues
 '''
 	
  
-
+	QNSF=4 #  Quarter Note Sampling frequency for dividing time
     COD_TYPE = 2  #  1 is 88 notes, 2 is 176 where position 0 is starting note, 1 is continuation note 
 
     SEQ_LEN=8*4*QNSF  # input note sequence   (SEQ_LEN / QNSF) 
@@ -24,7 +24,6 @@ MetaValues
     BATCH_SIZE_TRAIN=16  # batch for the train 
     BATCH_SIZE_VAL=16  # batch for the validation
     BATCH_SIZE_TEST=16  # batch for the test
-	QNSF=4   #  Quarter Note Sampling frequency for dividing time
     EPOCHS=50
 
     DATA_LEN_TRAIN=30  #Number of songs used for Data Generator (-1 for all) for train
@@ -62,7 +61,7 @@ Init Model
 '''
 Train Model
 '''
-	model.training_focal(training_generator,learning_rate=1e-4,epochs=EPOCHS, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0)
+	model.training_network(training_generator,learning_rate=1e-4,epochs=EPOCHS, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0)
         
     
     
