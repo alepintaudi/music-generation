@@ -89,20 +89,19 @@ class MidiDataset(data.Dataset):
 def list_midi_files(midi_source, data_len_train, data_len_val , data_len_test, randomSeq=True, seed = 666):
     """ Given a directory with midi files, return a tuple of 3 lists with the filenames for the train, validation and test sets 
         The funcion can apply some randomeness in the files selection order although it can be reproduced cause of the seed number
-    """
-    
-  midi_files_all = []
-  # iterate over all filenames in the midi_Source
-  for (dirpath, dirnames, filenames) in walk(midi_source):
-    midi_files_all.extend(filenames)
-  midi_files_all = [ glob.glob(midi_source+"/"+fi)[0] for fi in midi_files_all if fi.endswith(".mid") ]
-  
-  # we apply som randomnes in the midi selection to prevent some systematic dependences between train, validation and test.
-  if randomSeq:
-    random.seed( seed )
-    midi_files_sel = random.sample(midi_files_all, (data_len_train + data_len_val + data_len_test))
-  else:
-    midi_files_sel = midi_files_all
+    """  
+    midi_files_all = []
+    # iterate over all filenames in the midi_Source
+    for (dirpath, dirnames, filenames) in walk(midi_source):
+        midi_files_all.extend(filenames)
+    midi_files_all = [ glob.glob(midi_source+"/"+fi)[0] for fi in midi_files_all if fi.endswith(".mid") ]
+
+    # we apply som randomnes in the midi selection to prevent some systematic dependences between train, validation and test.
+    if randomSeq:
+        random.seed( seed )
+        midi_files_sel = random.sample(midi_files_all, (data_len_train + data_len_val + data_len_test))
+    else:
+        midi_files_sel = midi_files_all
     
   
   return midi_files_sel[:data_len_train], midi_files_sel[data_len_train:(data_len_train + data_len_val)], midi_files_sel[(data_len_train + data_len_val):]
@@ -115,67 +114,66 @@ def cleanSeq(x, cod_type):
         Another rule is that it can't exist a one in the even and odd position in the same time step. If exists, 
         then the one in the ood is removed.
     """
-  if cod_type==2:
-    # first row correction
-    notePos = np.where(x[0,:]==1)[0]        # where are the ones
-    notePosWrong = np.array([aa%2 for aa in notePos])  
-    notePosWrongPos = np.where(notePosWrong==1)[0]     # we look if corespond to odd positions
-    x[0,notePos[notePosWrongPos]]=0                    # if present, we correct to 0 the odd
-    x[0,notePos[notePosWrongPos]-1]=1                  # if present, we correct to 0 the correspondent even position
-    
-    # other rows correction
-    # when we have 1 in even and odd position, then remove the second one 
-    x[:,[ii for ii in range(x.shape[1]) if ii%2==1 ] ] = x[:,[ii for ii in range(x.shape[1]) if ii%2==1 ] ] * (1-x)[:,[ii for ii in range(x.shape[1]) if ii%2==0 ] ]
+    if cod_type==2:
+        # first row correction
+        notePos = np.where(x[0,:]==1)[0]        # where are the ones
+        notePosWrong = np.array([aa%2 for aa in notePos])  
+        notePosWrongPos = np.where(notePosWrong==1)[0]     # we look if corespond to odd positions
+        x[0,notePos[notePosWrongPos]]=0                    # if present, we correct to 0 the odd
+        x[0,notePos[notePosWrongPos]-1]=1                  # if present, we correct to 0 the correspondent even position
 
-    # now we want to compare with previous row
-    x_0 = x[1:,1:]     #   base values to correct
-    x_1 = x[0:-1,1:]   #   previous same column
-    x_11 = x[0:-1,0:-1]#   previous even column
-    x_sel = np.zeros(x_0.shape)  # odd columns f x
-    x_sel[:, [ii for ii in range(x_sel.shape[1]) if ii%2==0 ] ] =1   # corespond to even columns of x_sel
-    x_2 = ((x_1==0) & (x_11==0) & (x_0==1) & (x_sel==1))   # columns with one in odd that not have any in even or odd correspondece in previous row
-    x[1:,1:][x_2] = 0    # correction in unpair row
-    x[1:,:-1][x_2] = 1
-    
-  return(x)
+        # other rows correction
+        # when we have 1 in even and odd position, then remove the second one 
+        x[:,[ii for ii in range(x.shape[1]) if ii%2==1 ] ] = x[:,[ii for ii in range(x.shape[1]) if ii%2==1 ] ] * (1-x)[:,[ii for ii in range(x.shape[1]) if ii%2==0 ] ]
+
+        # now we want to compare with previous row
+        x_0 = x[1:,1:]     #   base values to correct
+        x_1 = x[0:-1,1:]   #   previous same column
+        x_11 = x[0:-1,0:-1]#   previous even column
+        x_sel = np.zeros(x_0.shape)  # odd columns f x
+        x_sel[:, [ii for ii in range(x_sel.shape[1]) if ii%2==0 ] ] =1   # corespond to even columns of x_sel
+        x_2 = ((x_1==0) & (x_11==0) & (x_0==1) & (x_sel==1))   # columns with one in odd that not have any in even or odd correspondece in previous row
+        x[1:,1:][x_2] = 0    # correction in unpair row
+        x[1:,:-1][x_2] = 1
+    return(x)
 
 
 def create_midi(prediction_output, qnsf = 4, cod_type=2, midiOutputFile='test_output.mid'):
     """ convert the output (as a numpy array) from the prediction to notes and create a midi file
-        from the notes """
+        from the notes 
+    """
     offset = 0
     output_notes = []
 
     # create note and chord objects based on the values generated by the model
     for i,pattern in enumerate(prediction_output):
-      # pattern is a note
-      notes = []
-      noteIndex = np.where(pattern==1)[0]
-      noteIndex = noteIndex[[ii % cod_type ==0 for ii in noteIndex]]
-      if len(noteIndex)>0:  
-        for current_note in noteIndex:
-          new_note = note.Note(int(current_note/cod_type + 21))
-          new_note.storedInstrument = instrument.Piano()
-          new_note.offset = offset
-          # duration.quarterLength in case cod_type==2
-          if cod_type==2 :
-            # sequence of duration equal to one in the odd position
-            auxDuration = np.where(prediction_output[(i+1):,current_note + 1]==1)[0]
-            # initialize duration
-            minimum_value = 0
-            if len(auxDuration)>0:
-              # minimum position where we have a consecuive sequence at 0
-              # we add one to include complete sequences
-              minimum_value = np.array(range(len(auxDuration)+1))[~np.isin(range(len(auxDuration)+1),auxDuration)].min()
+        # pattern is a note
+        notes = []
+        noteIndex = np.where(pattern==1)[0]
+        noteIndex = noteIndex[[ii % cod_type ==0 for ii in noteIndex]]
+        if len(noteIndex)>0:  
+            for current_note in noteIndex:
+                new_note = note.Note(int(current_note/cod_type + 21))
+                new_note.storedInstrument = instrument.Piano()
+                new_note.offset = offset
+                # duration.quarterLength in case cod_type==2
+                if cod_type==2 :
+                    # sequence of duration equal to one in the odd position
+                    auxDuration = np.where(prediction_output[(i+1):,current_note + 1]==1)[0]
+                    # initialize duration
+                    minimum_value = 0
+                    if len(auxDuration)>0:
+                      # minimum position where we have a consecuive sequence at 0
+                      # we add one to include complete sequences
+                      minimum_value = np.array(range(len(auxDuration)+1))[~np.isin(range(len(auxDuration)+1),auxDuration)].min()
+                  # we calcuate the minimum number in the sequance :len(auxDuration) that is not 
+                  # in the sequence, add one and divide by QNSF
+                  new_note.duration.quarterLength = ( minimum_value + 1.0)/qnsf
 
-            # we calcuate the minimum number in the sequance :len(auxDuration) that is not 
-            # in the sequence, add one and divide by QNSF
-            new_note.duration.quarterLength = ( minimum_value + 1.0)/qnsf
-            
-          output_notes.append(new_note)
+              output_notes.append(new_note)
 
-      offset += 1.0/qnsf
-    
+        offset += 1.0/qnsf
+
     midi_stream = stream.Stream(output_notes)
 
     midi_stream.write('midi', fp=midiOutputFile)
