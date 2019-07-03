@@ -24,7 +24,7 @@ MetaValues
     BATCH_SIZE_TRAIN=16  # batch for the train 
     BATCH_SIZE_VAL=16  # batch for the validation
     BATCH_SIZE_TEST=16  # batch for the test
-	QNSF = 4   #  Quarter Note Sampling frequency for dividing time
+	QNSF=4   #  Quarter Note Sampling frequency for dividing time
     EPOCHS=50
 
     DATA_LEN_TRAIN=30  #Number of songs used for Data Generator (-1 for all) for train
