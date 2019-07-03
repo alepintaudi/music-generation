@@ -11,9 +11,6 @@ import torch
 
 
 def main():
-'''
-MetaValues
-'''
     QNSF=4 #  Quarter Note Sampling frequency for dividing time
 		
     COD_TYPE = 2  #  1 is 88 notes, 2 is 176 where position 0 is starting note, 1 is continuation note 
