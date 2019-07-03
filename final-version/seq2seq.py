@@ -130,7 +130,7 @@ class Seq2Seq(nn.Module):
 	      density_train=[]
 	
 	      for epoch in range(epochs):
-	          for i,batch in enumerate(training_generator):
+	 	  for i,batch in enumerate(training_generator):
 	              # Forward pass: Compute predicted y by passing x to the model
 	              x = batch[0]
 	              y = batch[1]
@@ -160,7 +160,7 @@ class Seq2Seq(nn.Module):
 	          #represents the density of the pianoroll. Good values for 176 (COD_TYPE=2) 4 voices tend to be arround 0.025
 	          density_train.append((y_pred>self.thr).float().mean().item())
 	  		
-	 	  print('Epoch: {}, Loss: {:06.2f}, Recall: {:06.4f}, Precision: {:06.4f}, Density: {:06.4f}'.format(epoch, loss_train[epoch], recall_train[epoch], precision_train[epoch], density_train[epoch]))
+	 	  print("Epoch: {}, Loss: {:06.2f}, Recall: {:06.4f}, Precision: {:06.4f}, Density: {:06.4f}".format(epoch, loss_train[epoch], recall_train[epoch], precision_train[epoch], density_train[epoch]))
   
   def zero_init_hidden_predict(self):
     
