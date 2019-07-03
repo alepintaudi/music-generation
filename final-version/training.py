@@ -30,7 +30,7 @@ def main():
     DATA_LEN_VAL=15  #Number of songs used for Data Generator (-1 for all) for validation
     DATA_LEN_TEST=15   #Number of songs used for Data Generator (-1 for all) test
 
-    MIDI_SOURCE = "tempData/midi" #For Bach Choral
+    MIDI_SOURCE = "tempData/midi" #For Bach Choral a
     #MIDI_SOURCE = download_datasets(data_set=1)
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
