@@ -161,14 +161,14 @@ def create_midi(prediction_output, qnsf = 4, cod_type=2, midiOutputFile='test_ou
                     # initialize duration
                     minimum_value = 0
                     if len(auxDuration)>0:
-                      # minimum position where we have a consecuive sequence at 0
-                      # we add one to include complete sequences
-                      minimum_value = np.array(range(len(auxDuration)+1))[~np.isin(range(len(auxDuration)+1),auxDuration)].min()
-                  # we calcuate the minimum number in the sequance :len(auxDuration) that is not 
-                  # in the sequence, add one and divide by QNSF
-                  new_note.duration.quarterLength = ( minimum_value + 1.0)/qnsf
+                        # minimum position where we have a consecuive sequence at 0
+                        # we add one to include complete sequences
+                        minimum_value = np.array(range(len(auxDuration)+1))[~np.isin(range(len(auxDuration)+1),auxDuration)].min()
+                    # we calcuate the minimum number in the sequance :len(auxDuration) that is not 
+                    # in the sequence, add one and divide by QNSF
+                    new_note.duration.quarterLength = ( minimum_value + 1.0)/qnsf
 
-              output_notes.append(new_note)
+                output_notes.append(new_note)
 
         offset += 1.0/qnsf
 
