@@ -70,5 +70,4 @@ if __name__ == "__main__":
     parser.add_argument('--midi_source', metavar='path', required=True,
                       help='the path to MIDI DATASET')
     args = parser.parse_args()
-
-	  training(MIDI_SOURCE=args.midi_source)  
+    training(MIDI_SOURCE=args.midi_source)  
