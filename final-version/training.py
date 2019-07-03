@@ -32,9 +32,9 @@ def main():
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-'''
-DataLoader and DataGenerator
-'''
+
+#DataLoader and DataGenerator
+
     #Read Files (returns a 3-d tuple of list of files)
     midi_files  = list_midi_files(MIDI_SOURCE, DATA_LEN_TRAIN, DATA_LEN_VAL, DATA_LEN_TEST, randomSeq=True)
 
@@ -48,16 +48,16 @@ DataLoader and DataGenerator
     validating_generator = data.DataLoader(dataset_val, batch_size=BATCH_SIZE_VAL, shuffle=True)
     testing_generator = data.DataLoader(dataset_test, batch_size=BATCH_SIZE_TEST, shuffle=True)
     
-'''
-Init Model
-'''
+
+#Init Model
+
     model = seq2seq.Seq2Seq(input_dim=88*COD_TYPE, rnn_dim=512, rnn_layers=2, thr=0)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-'''
-Train Model
-'''
+
+#Train Model
+
     model.training_network(training_generator,learning_rate=1e-4,epochs=EPOCHS, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0)
         
     return 0
