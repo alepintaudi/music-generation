@@ -33,7 +33,7 @@ def training(MIDI_SOURCE):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-#DataLoader and DataGenerator
+#DataLoader and DataGenerator 
 
     #Read Files (returns a 3-d tuple of list of files)
     midi_files  = list_midi_files(MIDI_SOURCE, DATA_LEN_TRAIN, DATA_LEN_VAL, DATA_LEN_TEST, randomSeq=True)
