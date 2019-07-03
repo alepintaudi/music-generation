@@ -205,4 +205,5 @@ class Seq2Seq(nn.Module):
 
 							seq[:,t,:] = output.view(shape[0],-1)
 
-					return seq[0][1:][:]
+					seq = seq[0][1:][:].cpu().detach().numpy() 
+					return seq
