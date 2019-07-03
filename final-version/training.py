@@ -62,32 +62,6 @@ def main():
         
     return 0
     
-    
-def download_datasets(data_set=1):
-    ''' 
-    Get one of the predifined datasets (returns the string with the path)
-    '''
-    assert data_set>=1 and data_set<=3, "There are only 3 predefined datasets so either pick a number between 1 and 3 or provide your own dataset"
-    
-    if data_set==1: #Bach Chorale
-        !curl https://www.dropbox.com/s/1l0m07pwgk0305t/jsb403.zip?dl=0 -L -o jsb403.zip
-        !mkdir tempData
-        !unzip jsb403.zip -d tempData
-        return "tempData/midi"
-    elif data_set==2: #Original GitHub (Game music)
-        !git clone https://github.com/Skuldur/Classical-Piano-Composer.git
-        return  os.getcwd() & "/Classical-Piano-Composer/midi_songs"
-    else: #Nottingham Database
-        !curl http://imanmalik.com/assets/dataset/TPD.zip -o TPD.zip
-        !mkdir TPDData
-        !unzip TPD.zip -d TPDData
-        return "TPDData/TPD/jazz"
-
-    return 0
-  
-  
-
-  
   
 if __name__ == "__main__":
     main()  
