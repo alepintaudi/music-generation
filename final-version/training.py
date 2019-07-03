@@ -9,25 +9,27 @@ import seq2seq
 from torch.utils import data
 import torch
 
-QNSF=4 #  Quarter Note Sampling frequency for dividing time
 
-COD_TYPE = 2  #  1 is 88 notes, 2 is 176 where position 0 is starting note, 1 is continuation note 
+def training(MIDI_SOURCE):
+	QNSF=4 #  Quarter Note Sampling frequency for dividing time
 
-SEQ_LEN=8*4*QNSF  # input note sequence   (SEQ_LEN / QNSF) 
+	COD_TYPE = 2  #  1 is 88 notes, 2 is 176 where position 0 is starting note, 1 is continuation note 
 
-BATCH_SIZE_TRAIN=16  # batch for the train 
-BATCH_SIZE_VAL=16  # batch for the validation
-BATCH_SIZE_TEST=16  # batch for the test
-EPOCHS=50
+	SEQ_LEN=8*4*QNSF  # input note sequence   (SEQ_LEN / QNSF) 
 
-DATA_LEN_TRAIN=30  #Number of songs used for Data Generator (-1 for all) for train
-DATA_LEN_VAL=15  #Number of songs used for Data Generator (-1 for all) for validation
-DATA_LEN_TEST=15   #Number of songs used for Data Generator (-1 for all) test
+	BATCH_SIZE_TRAIN=16  # batch for the train 
+	BATCH_SIZE_VAL=16  # batch for the validation
+	BATCH_SIZE_TEST=16  # batch for the test
+	EPOCHS=50
 
-MIDI_SOURCE = "tempData/midi" #For Bach Choral a
+	DATA_LEN_TRAIN=30  #Number of songs used for Data Generator (-1 for all) for train
+	DATA_LEN_VAL=15  #Number of songs used for Data Generator (-1 for all) for validation
+	DATA_LEN_TEST=15   #Number of songs used for Data Generator (-1 for all) test
 
-def training():
-    
+	#MIDI_SOURCE = "tempData/midi" #For Bach Choral a    
+
+
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -62,5 +64,11 @@ def training():
     
   
 if __name__ == "__main__":
+	import argparse
 
-	training()  
+    parser = argparse.ArgumentParser(description='Create and train a model')
+    parser.add_argument('--midi_source', metavar='path', required=True,
+                        help='the path to MIDI DATASET')
+    args = parser.parse_args()
+
+	training(MIDI_SOURCE=args.midi_source)  
