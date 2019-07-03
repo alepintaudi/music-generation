@@ -102,9 +102,7 @@ def list_midi_files(midi_source, data_len_train, data_len_val , data_len_test, r
         midi_files_sel = random.sample(midi_files_all, (data_len_train + data_len_val + data_len_test))
     else:
         midi_files_sel = midi_files_all
-    
-  
-  return midi_files_sel[:data_len_train], midi_files_sel[data_len_train:(data_len_train + data_len_val)], midi_files_sel[(data_len_train + data_len_val):]
+    return midi_files_sel[:data_len_train], midi_files_sel[data_len_train:(data_len_train + data_len_val)], midi_files_sel[(data_len_train + data_len_val):]
 
 def cleanSeq(x, cod_type):
     """ Given a pianoroll x tith 3 dimensions: batches, timesteps and notes*cod_type, the function returns the
