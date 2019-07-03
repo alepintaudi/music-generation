@@ -32,7 +32,7 @@ MetaValues
     MIDI_SOURCE = "tempData/midi" #For Bach Choral a
     #MIDI_SOURCE = download_datasets(data_set=1)
 	
-	CASABLANCA=4
+	QNSF=2*2
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
