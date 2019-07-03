@@ -1,8 +1,10 @@
 # music-generation
 AIDL music generation
 
-## Here the original file with testing results and graphs (not visible in this ReadMe)
+## Here the original README enriched file with testing results, graphs and audios (not visible in this ReadMe)
 https://www.notion.so/aidlmusic/ReadMe-014338557385464a9ede62b3dd04a29b#6ad6da2ba64445dfb43464bac25e5bce
+
+
 
 # Task Definition
 
