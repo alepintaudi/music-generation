@@ -20,15 +20,13 @@ def training(MIDI_SOURCE):
     BATCH_SIZE_TRAIN=16  # batch for the train 
     BATCH_SIZE_VAL=16  # batch for the validation
     BATCH_SIZE_TEST=16  # batch for the test
-    EPOCHS=50
+    EPOCHS=20
 
     DATA_LEN_TRAIN=5  #Number of songs used for Data Generator (-1 for all) for train
     DATA_LEN_VAL=5  #Number of songs used for Data Generator (-1 for all) for validation
     DATA_LEN_TEST=5   #Number of songs used for Data Generator (-1 for all) test
 
     #MIDI_SOURCE = "tempData/midi" #For Bach Choral a    
-
-
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
