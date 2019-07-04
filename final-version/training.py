@@ -12,7 +12,6 @@ import torch
 
 def training(MIDI_SOURCE,QNSF=4,COD_TYPE=2,SEQ_LEN=128,BATCH_SIZE=16,EPOCHS=20,DATA_LEN_TRAIN=10,DATA_LEN_VAL=5,DATA_LEN_TEST=5,RNN_DIM=512,RNN_LAYERS=2,TEACHER_FORCING=0.5,ALPHA=0.65,GAMMA=2.0,LR=1e-4):
     
-    print(QNSF)
     '''
     QNSF=4 #  Quarter Note Sampling frequency for dividing time
 
@@ -20,9 +19,6 @@ def training(MIDI_SOURCE,QNSF=4,COD_TYPE=2,SEQ_LEN=128,BATCH_SIZE=16,EPOCHS=20,D
 
     SEQ_LEN=8*4*QNSF  # input note sequence   (SEQ_LEN / QNSF) 
 
-    BATCH_SIZE_TRAIN=BATCH_SIZE  # batch for the train 
-    BATCH_SIZE_VAL=BATCH_SIZE
-    BATCH_SIZE_TEST=BATCH_SIZE
     EPOCHS=20
 
     DATA_LEN_TRAIN=5  #Number of songs used for Data Generator (-1 for all) for train
@@ -31,6 +27,10 @@ def training(MIDI_SOURCE,QNSF=4,COD_TYPE=2,SEQ_LEN=128,BATCH_SIZE=16,EPOCHS=20,D
 
     #MIDI_SOURCE = "tempData/midi" #For Bach Choral a    
     '''
+    BATCH_SIZE_TRAIN=BATCH_SIZE  # batch for the train 
+    BATCH_SIZE_VAL=BATCH_SIZE
+    BATCH_SIZE_TEST=BATCH_SIZEs
+    
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
