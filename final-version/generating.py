@@ -27,8 +27,8 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Create and train a model')
 	parser.add_argument('--model_path', metavar='path', required=True)
 	parser.add_argument('--seq_len', type=int, required=False, default=200)
-	parser.add_argument('--hidden_init', type=string, required=False, default="zeros")
-	parser.add_argument('--midi_file', type=string, required=True)
+	parser.add_argument('--hidden_init', required=False, default="zeros")
+	parser.add_argument('--midi_file', required=True)
 
 	args = parser.parse_args()
 	generating(MODEL_PATH=args.model_path,SEQ_LEN=args.seq_len,HIDDEN_INIT=args.hidden_init,MIDI_FILE=args.midi_file)
