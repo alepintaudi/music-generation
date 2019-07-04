@@ -9,7 +9,7 @@ import seq2seq
 from torch.utils import data
 import torch
 
-def generating(MODEL_PATH,SEQ_LEN=200,HIDDEN_INIT="zeros",MIDI_FILE):
+def generating(MODEL_PATH,MIDI_FILE,SEQ_LEN=200,HIDDEN_INIT="zeros"):
 	
 	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
