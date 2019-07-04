@@ -15,7 +15,7 @@ def generating(MODEL_PATH,MIDI_FILE,SEQ_LEN=200,HIDDEN_INIT="zeros"):
 
 	seq2seqMod = torch.load(MODEL_PATH)
 
-	sequence=seq2seq.to(device).predict(seq_len=SEQ_LEN,hidden_init=HIDDEN_INIT)
+	sequence=seq2seqMod.to(device).predict(seq_len=SEQ_LEN,hidden_init=HIDDEN_INIT)
 
 	create_midi(sequence, qnsf = 4, cod_type=2, midiOutputFile=MIDI_FILE)
 
