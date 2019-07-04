@@ -29,7 +29,7 @@ def training(MIDI_SOURCE,QNSF=4,COD_TYPE=2,SEQ_LEN=128,BATCH_SIZE=16,EPOCHS=20,D
     '''
     BATCH_SIZE_TRAIN=BATCH_SIZE  # batch for the train 
     BATCH_SIZE_VAL=BATCH_SIZE
-    BATCH_SIZE_TEST=BATCH_SIZEs
+    BATCH_SIZE_TEST=BATCH_SIZE
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
