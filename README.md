@@ -2,6 +2,8 @@
 AIDL music generation
 
 ## How to execute
+Requirements: pytorch, music21
+
 Step 1 (after cloning): go to the final-version directoy
 
 Step 2: get a dataset. To train the model you need to provide the path to a folder where the midi dataset can be found (we have uplodaed some midis inside the subfolder datasets for testing purposes
