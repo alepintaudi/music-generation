@@ -22,17 +22,17 @@ def generating(MODEL_PATH,SEQ_LEN=200,HIDDEN_INIT="zeros",MIDI_FILE):
 	return sequence
 
 if __name__ == "__main__":
-    import argparse
+    	import argparse
 
-    parser = argparse.ArgumentParser(description='Create and train a model')
-    parser.add_argument('--model_path', metavar='path', required=True,
+    	parser = argparse.ArgumentParser(description='Create and train a model')
+   	 parser.add_argument('--model_path', metavar='path', required=True,
                       help='the path to MODEL')
-    parser.add_argument('--seq_len', type=int, required=False, default=200)
-    parser.add_argument('--hidden_init', type=string, required=False, default="zeros")
+    	parser.add_argument('--seq_len', type=int, required=False, default=200)
+    	parser.add_argument('--hidden_init', type=string, required=False, default="zeros")
 	parser.add_argument('--midi_file', type=string, required=True)
     
 	args = parser.parse_args()
-    generating(MODEL_PATH=args.model_path,SEQ_LEN=args.seq_len,HIDDEN_INIT=args.hidden_init,MIDI_FILE=args.midi_file)
+    	generating(MODEL_PATH=args.model_path,SEQ_LEN=args.seq_len,HIDDEN_INIT=args.hidden_init,MIDI_FILE=args.midi_file)
 			   
 	
 	
