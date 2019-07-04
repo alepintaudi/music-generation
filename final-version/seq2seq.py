@@ -160,7 +160,7 @@ class Seq2Seq(nn.Module):
 						density_train.append((y_pred>self.thr).float().mean().item())
                         
                         if epoch%5==0:
-                            torch.save(model, 'models/model_partial_{0}.pt'.format(epoch))
+                            torch.save(self, 'models/model_partial_{0}.pt'.format(epoch))
                         
 						print("Epoch: {}, Loss: {:06.2f}, Recall: {:06.4f}, Precision: {:06.4f}, Density: {:06.4f}".format(epoch, loss_train[epoch], recall_train[epoch], precision_train[epoch], density_train[epoch]))
 
