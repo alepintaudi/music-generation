@@ -11,6 +11,8 @@ import torch
 
 
 def training(MIDI_SOURCE,QNSF=4,COD_TYPE=2,SEQ_LEN=128,BATCH_SIZE=16,EPOCHS=20,DATA_LEN_TRAIN=10,DATA_LEN_VAL=5,DATA_LEN_TEST=5,RNN_DIM=512,RNN_LAYERS=2,TEACHER_FORCING=0.5,ALPHA=0.65,GAMMA=2.0,LR=1e-4):
+    
+    print(QNSF)
     '''
     QNSF=4 #  Quarter Note Sampling frequency for dividing time
 
