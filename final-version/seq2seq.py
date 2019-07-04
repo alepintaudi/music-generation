@@ -167,7 +167,7 @@ class Seq2Seq(nn.Module):
 		def zero_init_hidden_predict(self):
 				# initialize the hidden state and the cell state to zeros
 				# batch size is 1
-				return (torch.zeros(2,1, self.rnn_dim),torch.zeros(2,1, self.rnn_dim))
+				return (torch.zeros(self.rnn_layers,1, self.rnn_dim),torch.zeros(self.rnn_layers,1, self.rnn_dim))
 
 		def random_init_hidden_predict(self):
 				# initialize the hidden state and the cell state with a normal distribution
