@@ -10,16 +10,17 @@ from torch.utils import data
 import torch
 
 
-def training(MIDI_SOURCE):
+def training(MIDI_SOURCE,QNSF=4,COD_TYPE=2,SEQ_LEN=128,BATCH_SIZE=16,EPOCHS=20,DATA_LEN_TRAIN=10,DATA_LEN_VAL=5,DATA_LEN_TEST=5,RNN_DIM=512,RNN_LAYERS=2,TEACHER_FORCING=0.5,ALPHA=0.65,GAMMA=2.0,LR=1e-4):
+    '''
     QNSF=4 #  Quarter Note Sampling frequency for dividing time
 
     COD_TYPE = 2  #  1 is 88 notes, 2 is 176 where position 0 is starting note, 1 is continuation note 
 
     SEQ_LEN=8*4*QNSF  # input note sequence   (SEQ_LEN / QNSF) 
 
-    BATCH_SIZE_TRAIN=16  # batch for the train 
-    BATCH_SIZE_VAL=16  # batch for the validation
-    BATCH_SIZE_TEST=16  # batch for the test
+    BATCH_SIZE_TRAIN=BATCH_SIZE  # batch for the train 
+    BATCH_SIZE_VAL=BATCH_SIZE
+    BATCH_SIZE_TEST=BATCH_SIZE
     EPOCHS=20
 
     DATA_LEN_TRAIN=5  #Number of songs used for Data Generator (-1 for all) for train
@@ -27,7 +28,7 @@ def training(MIDI_SOURCE):
     DATA_LEN_TEST=5   #Number of songs used for Data Generator (-1 for all) test
 
     #MIDI_SOURCE = "tempData/midi" #For Bach Choral a    
-
+    '''
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -49,14 +50,14 @@ def training(MIDI_SOURCE):
 
 #Init Model
 
-    model = seq2seq.Seq2Seq(input_dim=88*COD_TYPE, rnn_dim=512, rnn_layers=2, thr=0)
+    model = seq2seq.Seq2Seq(input_dim=88*COD_TYPE, rnn_dim=RNN_DIM, rnn_layers=RNN_LAYERS, thr=0)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
 
 #Train Model
 
-    model.training_network(training_generator,learning_rate=1e-4,epochs=EPOCHS, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0)
+    model.training_network(training_generator,learning_rate=LR,epochs=EPOCHS, teacher_forcing_val=TEACHER_FORCING, tearcher_forcing_strat="fix", focal_alpha=ALPHA, focal_gamma=GAMMA)
     
     torch.save(model, 'models/model_def_{0}_{1}songs.pt'.format(EPOCHS,DATA_LEN_TRAIN))
     
@@ -69,5 +70,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create and train a model')
     parser.add_argument('--midi_source', metavar='path', required=True,
                       help='the path to MIDI DATASET')
+    parser.add_argument('--qnsf', metavar='int', required=False)
+    parser.add_argument('--cod_type', metavar='int', required=False)
+    parser.add_argument('--seq_len', metavar='int', required=False)
+    parser.add_argument('--batch_size', metavar='int', required=False)
+    parser.add_argument('--epochs', metavar='int', required=False)
+    parser.add_argument('--data_len_train', metavar='int', required=False)
+    parser.add_argument('--data_len_val', metavar='int', required=False)
+    parser.add_argument('--data_len_test', metavar='int', required=False)
+    parser.add_argument('--rnn_dim', metavar='int', required=False)
+    parser.add_argument('--rnn_layers', metavar='int', required=False)
+    parser.add_argument('--teacher_forcing', metavar='float', required=False)
+    parser.add_argument('--alpha', metavar='float', required=False)
+    parser.add_argument('--gamma', metavar='float', required=False)
+    parser.add_argument('--lr', metavar='float', required=False)
     args = parser.parse_args()
-    training(MIDI_SOURCE=args.midi_source)  
+    training(MIDI_SOURCE=args.midi_source,QNSF=args.qnsf,COD_TYPE=args.cod_type,SEQ_LEN=args.seq_len,BATCH_SIZE=args.batch_size,EPOCHS=args.epochs,DATA_LEN_TRAIN=args.data_len_train,DATA_LEN_VAL=args.data_len_val,DATA_LEN_TEST=args.data_len_test,RNN_DIM=args.rnn_dim,RNN_LAYERS=args.rnn_layers,TEACHER_FORCING=args.teacher_forcing,ALPHA=args.alpha,GAMMA=args.gamma,LR=args.lr)  
