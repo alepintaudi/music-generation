@@ -58,7 +58,7 @@ def training(MIDI_SOURCE):
 
     model.training_network(training_generator,learning_rate=1e-4,epochs=EPOCHS, teacher_forcing_val=0.5, tearcher_forcing_strat="fix", focal_alpha=0.75, focal_gamma=2.0)
     
-    torch.save(model, 'models/model_partial_{0}.pt'.format(epoch))
+    torch.save(model, 'models/model_def_{0}_{1}songs.pt'.format(EPOCHS,DATA_LEN_TRAIN))
     
     return model
     
