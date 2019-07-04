@@ -1,10 +1,8 @@
 # music-generation
 AIDL music generation
 
-## Here the original README enriched file with testing results, graphs and audios (not visible in this ReadMe)
+## !!! Here the original README enriched file with testing results, graphs and audios (not visible in this ReadMe)
 https://www.notion.so/aidlmusic/ReadMe-014338557385464a9ede62b3dd04a29b#6ad6da2ba64445dfb43464bac25e5bce
-
-
 
 # ReadMe - AIDL UPC 
 
@@ -181,8 +179,6 @@ Results of the trained model with the classical piano compositions for 95 EPOCHs
     93 0.013199646957218647 1.0
     94 0.003600984811782837 1.0
 
-### Audio example of the output
-
 Example of one midi file musical output we got from the above model, trying to predict the continuation of an input short-sequence from the dataset:
 
 ![](Untitled-326a3d0c-9227-46ba-8a88-fbb6843a4511.png)
@@ -205,7 +201,7 @@ We particularly focused on a Network used for style transfer in which we specifi
 
 Here is an extract from the paper:
 
-*Firstly, we quantize each MIDI file to align to the particular time interval thereby eliminating imprecisions of the performer. Secondly, we encode the input MIDI file into a T ×P matrix where T is the number of time steps in the song and P is the number of pitches in the instrument (Example, for piano with 88 keys we have 88 pitches). Further, in each value of the matrix we encode the information regarding note using a 2-D vector i.e., [1 1] note articulated, [0 1] note sustained and [0 0] note off.*
+*Firstly, we quantize each MIDI file to align to the particular time interval thereby eliminating imprecisions of the performer. Secondly, we encode the input MIDI file into a T×P matrix where T is the number of time steps in the song and P is the number of pitches in the instrument (Example, for piano with 88 keys we have 88 pitches). Further, in each value of the matrix we encode the information regarding note using a 2-D vector i.e., [1 1] note articulated, [0 1] note sustained and [0 0] note off.*
 
 (**Source** - ToneNet : A Musical Style Transfer [https://towardsdatascience.com/tonenet-a-musical-style-transfer-c0a18903c910](https://towardsdatascience.com/tonenet-a-musical-style-transfer-c0a18903c910))
 
@@ -289,7 +285,7 @@ Accuracy increased during training but remained quite low during validation, ten
 
 ***Loss*** 
 
-Despite the poor results obtained in terms of both loss and accuracy, we observed that during the training and validation steps, our network overfitted.
+With the following results obtained in terms of both loss and accuracy, we observed that during the training and validation steps, our network overfitted.
 
 ![](Untitled-9e45504e-488c-420a-8134-8cab0aadf572.png)
 
@@ -408,10 +404,6 @@ The two curves are immediately getting close, to then separated at the end endin
 
 After training the system with training and validation dataset and using the resulted weights, here below the mean and standard deviation of both Loss and Accuracy during the testing phase.
 
-### Testing
-
-[Results](https://www.notion.so/62b01d1b3ea2464e88d88853a0959274)
-
 ### Audio example of the output
 
 ![](Screen_Shot_2019-07-03_at_20-d9814291-fc7f-4565-833d-52694df53eac.56.27.png)
@@ -506,32 +498,51 @@ In this way we were able to quickly and efficiently train our model that was usi
 
 The last change we made to our system was to change the metrics on how we evaluate the training. Although this doesn't help on the results, it helps us better understand how the system evolves during training. In that regard we have stopped using accuracy as a metric since it quickly reaches over 90% (most of the piano roll states at each step are silenced in both target and prediction) and, therefore, it doesn't orient us at all. Instead, we've started using recall and precision (see graph bellow) which better match the task and clearly show more meaningful and understandable results. Another value that is worth monitoring while training is the "density" of the notes (how many notes would be held during the sequence divided by the whole sequence piano roll). This metric allows us to discard any system that, even while lowering the loss, doesn't manage to generate high enough levels of density, since our focus is on generation.
 
-    def recall(self,x,y):
-          x_pred = (x > self.thr).long() #where thr is 0 by default
+    	def recall(self,x,y):
+          #if BCELoss expects sigmoid -> th 0.5, 
+          #BCELossWithLogits expect real values -> th 0.0
+          x_pred = (x > self.thr).long() 
           return torch.mul(x_pred.float(),y).float().sum()/y.sum()
-        
+      
       def precision(self,x,y):
-          x_pred = (x > self.thr).long() #where thr is 0 by default
+             #if BCELoss expects sigmoid -> th 0.5, 
+          #BCELossWithLogits expect real values -> th 0.0
+          x_pred = (x > self.thr).long()
           return torch.mul(x_pred.float(),y).float().sum()/x_pred.float().sum()
+        
+      def note_density(self,y_pred):
+          #With our notation, a good value tends to be arround 0.025
+          return (y_pred>self.thr).float().mean()
 
 ### Training
 
-Results of Loss, Recall, Precission and Note density (a good value tends to be above 0.025, from training data)
+Results of Loss, Recall, Precision and Note density (a good value tends to be above 0.025, from training data) on Training Data.
 
-    0 3153.242187 0.000173 0.5 7.3982e-06
-    1 3458.074707 0.0 nan 0.
-    2 3163.663574 0.0 nan 0.
-    3 3250.581298 0.006364 0.629032 0.0002
-    4 3162.822753 0.010844 0.270833 0.0009
+    Trainig-> Epoch: 1, Loss: 3195.62, Recall: 0.1749, Precision: 0.2744, Density: 0.0133
+    Trainig-> Epoch: 2, Loss: 3348.21, Recall: 0.1518, Precision: 0.2843, Density: 0.0119
+    Trainig-> Epoch: 3, Loss: 3145.46, Recall: 0.1927, Precision: 0.3329, Density: 0.0128
+    Trainig-> Epoch: 4, Loss: 3110.96, Recall: 0.2000, Precision: 0.3543, Density: 0.0125
+    Trainig-> Epoch: 5, Loss: 2983.13, Recall: 0.2461, Precision: 0.3608, Density: 0.0147
+    ...
+    Trainig-> Epoch: 45, Loss: 1463.04, Recall: 0.6857, Precision: 0.5515, Density: 0.0274
+    Trainig-> Epoch: 46, Loss: 1386.09, Recall: 0.7311, Precision: 0.5663, Density: 0.0285
+    Trainig-> Epoch: 47, Loss: 1461.08, Recall: 0.6996, Precision: 0.5486, Density: 0.0287
+    Trainig-> Epoch: 48, Loss: 1350.14, Recall: 0.7327, Precision: 0.5802, Density: 0.0279
+    Trainig-> Epoch: 49, Loss: 1578.56, Recall: 0.6963, Precision: 0.5179, Density: 0.0291
 
-[ ... ]
+As can be observed the model seems to be able to converge (e.i.: learn the music that it's being trained with). Although it takes time to system, it eventually get to values of Note Density that would resemble the targets (0.025). This is due to the effect of the focal loss and more aggressive training (initially higher values for the learning rate). Unfortunately, we pay for it in validation, where we manage to achieve decent levels of Note Density but with terrible Recall, Precision and a clearly over-fitting loss:
 
-    45 2207.135742 0.316916 0.349118 0.0193
-    46 2128.198730 0.342842 0.367018 0.0200
-    47 2415.378906 0.362711 0.390139 0.0233
-    48 2270.105224 0.408077 0.384059 0.0261
-    49 2513.393066 0.378319 0.401861 0.0254
-    50 2423.801757 0.315098 0.373057 0.0200
+    Validation-> Epoch: 0, Loss: 3881.49, Recall: 0.0356, Precision: 0.1718, Density: 0.0051
+    Validation-> Epoch: 5, Loss: 3532.72, Recall: 0.0262, Precision: 0.1626, Density: 0.0042
+    Validation-> Epoch: 10, Loss: 3012.26, Recall: 0.0783, Precision: 0.1559, Density: 0.0114
+    Validation-> Epoch: 15, Loss: 3535.96, Recall: 0.0998, Precision: 0.1377, Density: 0.0162
+    Validation-> Epoch: 20, Loss: 4022.09, Recall: 0.1014, Precision: 0.1476, Density: 0.0164
+    Validation-> Epoch: 25, Loss: 4493.71, Recall: 0.1045, Precision: 0.1292, Density: 0.0188
+    Validation-> Epoch: 30, Loss: 4565.88, Recall: 0.1232, Precision: 0.1406, Density: 0.0195
+    Validation-> Epoch: 35, Loss: 5484.13, Recall: 0.0374, Precision: 0.1951, Density: 0.0045
+    Validation-> Epoch: 40, Loss: 5517.15, Recall: 0.1166, Precision: 0.1479, Density: 0.0175
+    Validation-> Epoch: 45, Loss: 5581.93, Recall: 0.1072, Precision: 0.1474, Density: 0.0178
+    
 
 **Learning Curves**
 
@@ -543,41 +554,103 @@ Results of Loss, Recall, Precission and Note density (a good value tends to be a
 
 ![](recall_precision-e761a4c6-f562-4726-ab69-c73097884cd9.png)
 
-### Results and Overall Conclusion of the current state
+### Prediction and Audio examples of the Final output
 
-We can see that the results have improve substantially (even if only for the fact that now our system is capable of generating some notes above the threshold). This could be due to the larger dataset and training time that had been used (we clearly can appreciate overfitting when comparing results). On the examples above, Train represents the music generated while initializing the hidden states of the decoder with the hidden states generated by the encoder with a train example (first half of the song is the training example). Test represents the same but with a test example as a "initialiser of the hidden states". Predict 1 and 2 represent what happens when we just used a decoder with the hidden states initialized at zero or a normal distribution, respectably. Those two last examples show that the system is still far from generating the music fully independent as the sequence tend to converge rapidly into silence.
+The results below show Generative / Predictive capabilities of our model. First a note on how they are generated. The decoder part of our model will act as a generator. Providing a first blank time step and an initialization of the hidden states of the LSTM decoder, the system should be able to generate a new sequence. The key point is on the Hidden State Initialization. We have programmed 3 different types of inizialization: at zero values, at Normal(1,0) and by providing an input sequence that goes through the encoder and feed the decoder with the output values (the task becomes then more of a "Continue the sequence").
 
-That being said, some extra improvements where introduced during training, that showed an improvement of the, at least, training results:
+    def zero_init_hidden_predict(self):
+    				# initialize the hidden state and the cell state to zeros
+    				# batch size is 1
+    				return (torch.zeros(self.rnn_layers,1, self.rnn_dim),torch.zeros(self.rnn_layers,1, self.rnn_dim))
+    
+    		def random_init_hidden_predict(self):
+    				# initialize the hidden state and the cell state with a normal distribution
+    				# batch size is 1
+    				return (torch.randn(self.rnn_layers,1, self.rnn_dim),torch.randn(self.rnn_layers,1, self.rnn_dim))
+    
+    		def predict(self,seq_len=500,hidden_init="zeros",x_init=torch.zeros(1,1,176).to(device)):
+    
+    					assert hidden_init=="zeros" or hidden_init=="random" or hidden_init=="guided", "hidden_init can only take values 'zeros', 'random','guided' (in which case you have to provide x_init)"
+    
+    					self.eval()
+    
+    					seq = torch.zeros(1,seq_len+1,self.input_dim).to(device)
+    
+    					if hidden_init=="zeros":
+    							hn,cn=self.zero_init_hidden_predict()
+    					elif hidden_init=="random":
+    							hn,cn=self.random_init_hidden_predict()
+    					else:
+    							output, (hn,cn)=self.encoder(x_init)
+    					hn=hn.to(device)
+    					cn=cn.to(device)
+    
+    					# for the sequence length
+    					for t in range(seq_len):
+    							output, (hn, cn) = self.decoder(seq[0,t].view(1,1,-1),(hn,cn)
+    							shape = output.shape
+    							x=output.unsqueeze(2)
+    							x = self.classifier(x) #no hace falta la softma
+    							x = x.view(shape[0],shape[1],-1)
+    							output = (x > self.thr).float()
+    							seq[:,t,:] = output.view(shape[0],-1)
+    
+    					seq = seq[0][1:][:].cpu().detach().numpy() #Output adapted to the Midi generator
+    					return seq
 
-- Modification of the alpha parameter of the focal loss (from 0.5 to 0.75) in order to weight more the well played notes instead of the well played silences. This reduces precision of the note selection but makes the system more aggressive and increases the "density" of the piano roll.
-- Decreasing the Teacher forcing with the Epochs during training. The system is capable of adapt better to the scenario of 0 teacher forcing (full predicting) if the teacher forcing gets diminished with time.
-- Variable learning rate in order to escape the local minima of the full silence score. We believe that the system has a local minima in a full silence score due to the important amount of notes that are not playing at any given time. By giving an initially larger learning rate (10^2),  the system seems to be able to escape that minima more easly at the beginning of training.
+The examples below show what happen when the hidden states are initialized with a sequence from the training set, the test set, initialize at zero and initialize at random:
 
-### Audio examples of the Final output
-
-**Train (input sequence until second 14, prediction after second 14)**
+**Train v1 (input sequence until second 14, prediction after second 14)**
 
 ![](Captura_de_Pantalla_2019-07-03_a_les_0-395432e9-e860-402b-801a-ff76daf228e2.31.47.png)
 
 [train_seq2seq-b568ef5b-972d-4084-a65f-ea6a2ebea012.mp3](train_seq2seq-b568ef5b-972d-4084-a65f-ea6a2ebea012.mp3)
 
-**Test (input sequence until second 15, prediction after second 15)**
+**Test v1 (input sequence until second 15, prediction after second 15)**
 
 ![](Captura_de_Pantalla_2019-07-03_a_les_0-ff99e622-5d3d-4c70-8fbf-cad1ecc88d21.32.49.png)
 
 [test_seq2seq-38890420-8d9f-4a78-bfdb-706d871095f8.mp3](test_seq2seq-38890420-8d9f-4a78-bfdb-706d871095f8.mp3)
 
-**Predict #1 - Zeros**
+**Predict v1 #1 - Zeros init**
 
-![](Captura_de_Pantalla_2019-07-03_a_les_0-9b096006-016d-4571-b991-1c2e9532b92f.34.14.png)
+![](4th_3-489ad0cd-2778-4526-a683-42f722c92577.png)
 
-[predictseq2seq_zeros-eea05306-764f-4b70-aae5-0dce740936c5.mp3](predictseq2seq_zeros-eea05306-764f-4b70-aae5-0dce740936c5.mp3)
+[predictseq2seq_zeros-eea05306-764f-4b70-aae5-0dce740936c5-93b970d4-2639-4320-841b-dbd9129076e3.mp3](predictseq2seq_zeros-eea05306-764f-4b70-aae5-0dce740936c5-93b970d4-2639-4320-841b-dbd9129076e3.mp3)
 
-**Predict #2 - Rand**
+**Predict v1 #2 - Random init**
 
-![](Captura_de_Pantalla_2019-07-03_a_les_0-63f71470-b05a-454e-a6d1-294b8504cdcd.35.33.png)
+![](4th_4-1ce460bf-5bd0-44fa-ba09-9ff81b31990f.png)
 
-[predictseq2seq_rand-3d16fdf3-b42c-4800-be0a-845b45457e70.mp3](predictseq2seq_rand-3d16fdf3-b42c-4800-be0a-845b45457e70.mp3)
+[predictseq2seq_rand-3d16fdf3-b42c-4800-be0a-845b45457e70-0ca2ba46-7747-4089-a158-ca663c2b358d.mp3](predictseq2seq_rand-3d16fdf3-b42c-4800-be0a-845b45457e70-0ca2ba46-7747-4089-a158-ca663c2b358d.mp3)
+
+**Predict v2 #1 - Zeros init**
+
+![](predict_zeros-d4a1aa43-2d38-4268-ad11-8903129fa0e8.png)
+
+[zeros_seq2seqv2_007-536c96b5-73cd-4049-8ed0-e0b2b4dfe70a.mp3](zeros_seq2seqv2_007-536c96b5-73cd-4049-8ed0-e0b2b4dfe70a.mp3)
+
+**Predict v2 #2 - Random init - Case 1**
+
+![](predict_rand-49be028d-9e7e-4655-afa1-62a2e5642f4f.png)
+
+[random_seq2seqv2_007-d49a2778-9e28-4857-aa98-b9981ec39f43.mp3](random_seq2seqv2_007-d49a2778-9e28-4857-aa98-b9981ec39f43.mp3)
+
+**Predict v2 #3 - Random init - Case 2**
+
+![](predict_rand(1)-9b29c31d-a27c-4839-a4e9-17e1cfd6492f.png)
+
+[random_seq2seqv2_007_(1)-8961ce29-e408-490d-9458-7396e9b47433.mp3](random_seq2seqv2_007_(1)-8961ce29-e408-490d-9458-7396e9b47433.mp3)
+
+### Results and Overall Conclusion of the current state
+
+We can see that the results have improve substantially (even if only for the fact that now our system is capable of generating some notes above the threshold). This could be due to the larger dataset and training time that had been used (we clearly can appreciate over-fitting when comparing results). Although the model is clearly capable of generating new music when given an initial guide line, the two last examples show that the model is still far from generating the music fully independent as the sequence tend to converge rapidly into silence.
+
+That being said, some extra improvements where introduced during training, that showed an improvement of the, at least, training results:
+
+- Modification of the alpha parameter of the focal loss (from 0.5 to 0.75) in order to weight more the well played notes instead of the well played silences. This reduces precision of the note selection but makes the system more aggressive and increases the "density" of the piano roll.
+- Decreasing the Teacher forcing with the Epochs during training. The system is capable of adapt better to the scenario of 0 teacher forcing (full predicting) if the teacher forcing gets diminished with time.
+- Variable learning rate in order to escape the local minimum of the full silence score. We believe that the system has a local minimum in a full silence score due to the important amount of notes that are not playing at any given time. By giving an initially larger learning rate (10^2),  the system seems to be able to escape that minimum more easily at the beginning of training.
 
 # Further Work
 
