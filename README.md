@@ -1,6 +1,18 @@
 # music-generation
 AIDL music generation
 
+## How to execute
+Step 1 (after cloning): go to the final-version directoy
+
+Step 2: get a dataset. To train the model you need to provide the path to a folder where the midi dataset can be found (we have uplodaed some midis inside the subfolder datasets for testing purposes
+
+Step 3: train the model by executing the following command  >>python training.py --midi_source=[YOUR_MIDI_PATH]
+There are other hyperparameters that can be defined at during training but they are not mandatory and have default values. Copy of the model will be save inside the models directory
+
+Step 4: load a model
+
+
+
 ## !!! Here the original README enriched file with testing results, graphs and audios (not visible in this ReadMe)
 https://www.notion.so/aidlmusic/ReadMe-014338557385464a9ede62b3dd04a29b#6ad6da2ba64445dfb43464bac25e5bce
 
