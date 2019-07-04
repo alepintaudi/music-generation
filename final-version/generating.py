@@ -25,8 +25,7 @@ if __name__ == "__main__":
     	import argparse
 
     	parser = argparse.ArgumentParser(description='Create and train a model')
-   	 parser.add_argument('--model_path', metavar='path', required=True,
-                      help='the path to MODEL')
+   	parser.add_argument('--model_path', metavar='path', required=True, help='the path to MODEL')
     	parser.add_argument('--seq_len', type=int, required=False, default=200)
     	parser.add_argument('--hidden_init', type=string, required=False, default="zeros")
 	parser.add_argument('--midi_file', type=string, required=True)
