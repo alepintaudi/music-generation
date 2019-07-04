@@ -6,13 +6,19 @@ https://www.notion.so/aidlmusic/ReadMe-014338557385464a9ede62b3dd04a29b#6ad6da2b
 
 
 
+# ReadMe - AIDL UPC 
+
+"MIDI Music Group" by Ferran Carrascosa, Oscar Casanovas, Alessandro Pintaudi and Martí Pomés. Advisor: Carlos Segura. July 2019.
+
+Github link: [https://github.com/alepintaudi/music-generation.git](https://github.com/alepintaudi/music-generation.git)
+
 # Task Definition
 
-This project presents the implementation of a basic MIDI compositions music generation system while we learn about the implementation of 3 Neural Network models (LSTM Seq2One with Keras, LSTM Seq2One with PyTorch, LSTM Seq2Seq with PyTorch). We also provide an overview of the current State of the Art on Music Generation systems using Deep Learning as well as other simpler but very interesting individual projects developed recently.
+This project presents the implementation of a basic MIDI compositions music generation system while we learn about the implementation of 3 Neural Network models (LSTM Seq2One with Keras, LSTM Seq2One with PyTorch, LSTM Seq2Seq with PyTorch). We also provide an overview of the current commercial and research projects on Music Generation systems using Deep Learning as well as other simpler but very interesting individual projects developed recently.
 
 # Introduction
 
-Throughout the past 4 years, we have seen impressive progress in the field of generative music and Artificial Intelligence thanks to the developments made on Deep Learning technologies.
+Over the past 4 years, we have seen impressive progress in the field of generative music and Artificial Intelligence thanks to the developments made on Deep Learning technologies.
 
 The goal of this Postgraduate project is to get hands-on experience on building our own Model that is trained with a collection of MIDI files and then is modified to generate new short composition snippets that are evaluated on their degree of musicality and closeness to passing a Turing test.
 
@@ -28,7 +34,7 @@ During the latest AI Music news boom, many journalists predict that soon we will
 
 These use cases could have a strong “Product/market fit” for new automatic music composing systems able to provide professional quality music at a very affordable rate for media companies, freelancers, individuals, music enthusiasts as well as general music listeners.
 
-# Benchmarks & SOTA
+# Benchmarks
 
 For reference, we believe it is also important to mention the following Deep Learning Music Generation projects that show the output quality of current State of the art commercial and research applications:
 
@@ -62,6 +68,10 @@ BachBot Github:
 
 [https://github.com/feynmanliang/bachbot](https://github.com/feynmanliang/bachbot)
 
+# Hypothesis
+
+Since Natural Language Processing Deep Learning Methods are used to model and generate written language, they can also be used to model, reproduce and generate Musical Language. 
+
 # Experiments
 
 Here you'll find the various experiments that led us to the final model of music generation (4th Experiment). At each step we explain the issues we detected and how we tried to find a solution to move forward and get a step closer to the target solution previously defined: generate a model capable of being trained with music and eventually generate a novel midi file output with similar music style. 
@@ -92,7 +102,7 @@ E-5
 A5 
 E5 
 
-Code to generate the vocabulary of notes:
+Code to generate the vocabulary of notes and chords:
 
     def get_notes(n=-1):
     """ Get all the notes and chords from the midi files in the ./midi_songs directory """
@@ -311,7 +321,7 @@ In this third experiment we tried to solve the issues found during the second ex
 
 Here the decoder was finally generating a sequence of the same length as the one sent to the encoder.
 
-We have also increase the time step (from 1/12 to 1/4) in order to avoid the problems mentioned above (monotony due to the LSTM being unable to look too far back). This makes our system less capable to understand rhythm but should improve the variety of the notes produced. 
+We have also increased the time step (from 1/12 to 1/4 of a quarter note) in order to avoid the problems mentioned above (monotony due to the LSTM being unable to look too far back). This makes our system less capable to understand fast/detailed note durations but should allow the network to focus more on the pitch (notes) and harmony, improving the variety and complexity of the notes generated. 
 
 ### The Model
 
@@ -324,69 +334,77 @@ We then have a decoder with a first fully connected layer that reduces dimension
 Cross-Entropy Loss function is finally applied to the results. 
 
     class Seq2Seq(nn.Module):
-    def **init**(self, input_dim, rnn_dim=512, rnn_layers=2):
-    super(Seq2Seq, self).**init**()
-    self.encoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
-    self.decoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
-    self.classifier = nn.Sequential(
-    nn.Linear(rnn_dim, 256),
-    nn.ReLU(),
-    nn.Dropout(0.5),
-    nn.Linear(256, input_dim)
-    )
-    self.loss_function = nn.CrossEntropyLoss() 
+      def __init__(self, input_dim, rnn_dim=512, rnn_layers=2):
+          super(Seq2Seq, self).__init__()
+          self.encoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
+          self.decoder = nn.LSTM( input_size=input_dim, hidden_size=rnn_dim, num_layers=rnn_layers, batch_first=True, dropout=0.2)
+          self.classifier = nn.Sequential(
+              nn.Linear(rnn_dim, 256),
+              nn.ReLU(),
+              nn.Dropout(0.5),
+              nn.Linear(256, input_dim)
+          )
+          self.loss_function = nn.CrossEntropyLoss() #combina logsoftmax y NLLLoss
 
 Results are then normalised using Softmax.
 
-      self.norm = nn.Softmax()v
+    self.norm = nn.Softmax()
 
 **Decoder**
 
 The decoder used in here is providing what we missed in the previous experiment: an output sequence of the same length as the one at the input of the encoder. In this way the network is able to generate a sequence made of logical sounds.
 
     def forward(self, x,y):          
-    
+    #           output, (hn, cn) = rnn(input, (h0, c0))
           output, (hn, cn) = self.encoder(x)
-          output, (hn, cn) = self.decoder(y, (hn,cn))
+          #y = torch.cat([torch.zeros( (y.shape[0],1,y.shape[2]),).to(device) , y] , dim=1)  
+    
+          output, (hn, cn) = self.decoder(y, (hn,cn)) #el y tiene que tener padding de cero, por ejemplo para marcar el inicio de sequencia
+          
           shape = output.shape
+          
           x=output.unsqueeze(2)
-          x = self.classifier(x)
+          
+          #x= output.view(output.shape[0],output.shape[1]*output.shape[2])
+          
+          x = self.classifier(x) #no hace falta la softmax
+          
           x = x.view(shape[0],shape[1],-1)
+          
           return x
 
 ### Training
 
 Results of Loss and Accuracy for both Training and Validation for 100 EPOCHs:
 
-    0 1.0397608280181885 0.7631075978279114 0.8751183748245239 0.9065656661987305
-    1 0.6295673847198486 0.7631075978279114 0.9144176244735718 0.9065656661987305
-    2 0.53970867395401 0.7631075978279114 0.927438497543335 0.9065656661987305
-    3 0.6158638000488281 0.7631075978279114 0.911695122718811 0.9065656661987305
-    4 0.5996387600898743 0.7631075978279114 0.9122869372367859 0.9065656661987305
-    5 0.5661443471908569 0.7631075978279114 0.917613685131073 0.9065656661987305
+    0 5.035482406616211 5.037669658660889 0.23246753215789795 0.6515151858329773
+    1 3.8860442638397217 5.037669658660889 0.27207791805267334 0.6515151858329773
+    2 1.9315378665924072 5.037669658660889 0.7129870057106018 0.6515151858329773
+    3 1.4045366048812866 5.037669658660889 0.798701286315918 0.6515151858329773
+    4 1.2527923583984375 5.037669658660889 0.8009740114212036 0.6515151858329773
+    5 1.1773496866226196 5.037669658660889 0.807467520236969 0.6515151858329773
 
 [ ... ]
 
-    94 0.03222033753991127 0.34312954545021057 0.9917140603065491 0.9595959782600403
-    95 0.03811696544289589 0.34312954545021057 0.9889914989471436 0.9595959782600403
-    96 0.027607234194874763 0.34312954545021057 0.9906486868858337 0.9595959782600403
-    97 0.029885871335864067 0.34312954545021057 0.990293562412262 0.9595959782600403
-    98 0.030058154836297035 0.34312954545021057 0.9912405610084534 0.9595959782600403
-    99 0.034393422305583954 0.34312954545021057 0.989938497543335 0.9595959782600403
+    95 0.46134012937545776 3.0863828659057617 0.8600649237632751 0.7196969985961914
+    96 0.4543679654598236 3.0863828659057617 0.857467532157898 0.7196969985961914
+    97 0.4416855573654175 3.0863828659057617 0.8639610409736633 0.7196969985961914
+    98 0.4552253186702728 3.0863828659057617 0.8620129823684692 0.7196969985961914
+    99 0.42390283942222595 3.0863828659057617 0.8652597069740295 0.7196969985961914
 
 **Learning Curves**
 
 ***Loss*** 
 
-Both curves reduce the loss being close to 0 without overfitting. The validation curve in fact starts increasing at the end of the training. 
+The loss suddenly decreases to then increase and end up overfitting our model
 
-![](Untitled-43ce74a2-e17d-49ab-aa06-b0915bc2cdab.png)
+![](Untitled-50d25795-3e61-47f1-800c-fa1a40a2f5fe.png)
 
 ***Accuracy***
 
-The two curves are starting close to each other, to then separated and eventually end up both above the 95% of accuracy.
+The two curves are immediately getting close, to then separated at the end ending with an accuracy around 70%
 
-![](Untitled-5f77bbf0-f2bd-45ae-9c28-377248cb59b3.png)
+![](Untitled-8546c25c-f230-40a2-9a86-cc7e38eb3438.png)
 
 After training the system with training and validation dataset and using the resulted weights, here below the mean and standard deviation of both Loss and Accuracy during the testing phase.
 
@@ -396,27 +414,29 @@ After training the system with training and validation dataset and using the res
 
 ### Audio example of the output
 
-![](Captura_de_Pantalla_2019-07-03_a_les_0-3d80942e-82a7-4102-921f-81d9d2f80321.25.07.png)
+![](Screen_Shot_2019-07-03_at_20-d9814291-fc7f-4565-833d-52694df53eac.56.27.png)
 
-[test_seq2seqv2_006-31fa9f9e-2363-40e6-92b5-42e6a0d6a04e.mp3](test_seq2seqv2_006-31fa9f9e-2363-40e6-92b5-42e6a0d6a04e.mp3)
+[test_seq2seq_(2)-665a6290-7ea5-4ea4-8a0d-c077454d3afb.mp3](test_seq2seq_(2)-665a6290-7ea5-4ea4-8a0d-c077454d3afb.mp3)
 
 ### Results and Conclusions of the 3rd Experiment
 
-Contrary to the previous experiment here the loss function is able to detect sequences and therefore the output sound is no longer made of single monotonic notes. 
+Contrary to the previous experiment here the loss function is able to detect sequences and therefore the output shows more variation, although it is still an issue to be improved on further experiments. 
 
-Yet, although the network is now able to generate a sequence of audible sounds, the decoder is generating each new sequence based on real values instead of the previously generated output, which actually also was happening on the 2nd Experiment.
+Another point to be mentioned is that the network is now able to generate a sequence of audible sounds, the decoder is generating each new sequence based on real values instead of the previously generated output. This means that, in this model, the decoder behaves with what we could call an implicit full teacher forcing. During training, the whole target sequence is used at the entry of the decoder instead of using the prediction at *n* to predict the output at *n+1*.
 
-In this model the decoder behaves with an implicit teacher forcing always set as 1.
+Another detected issue at this point was that we kept Cross-Entropy Loss (one single class/note as a target) since our 1st Experiment while trying to generate polyphonic music. This was correct for the 1st Experiment, since there we were using one-hot encoding even for chords (multi-note events). On the second and third experiments we moved away from one-hot encoding into 176 long vector (the Piano Roll) with multiple possible notes encoded in a single time step. Our mistake was to keep a Loss Function for a multi-class problem into a multi-label problem.
 
 ## 4th Experiment - Final Version
 
 ### Motivation
 
-In this fourth experiment we tried to improve the previous model, starting by solving its main problem of generating only monophonic music and providing the right architecture to generate polyphonic music at the output.
+In this fourth experiment we tried to improve the previous model, starting by solving its main problem of generating only monophonic music and generating polyphonic music at the output.
 
 ### The Architecture
 
 To make a recap. We keep the basis of our model mentioned in experiment 3: an encoder with 2 Layers LSTM (hidden dimension of 512) and a Decoder with a 2 Layer LSTM (hidden dimension of 512) and a Classifier based on 2 Layers of fully connected (intermidiate dimension of 256). All of them with dropout implemented.
+
+In this model we also introduced a new hyper parameter, brought by the BCE Loss function that expects a threshold value to be checked against the output when applying the Sigmoid function.
 
 ### The Loss Function
 
@@ -426,32 +446,7 @@ BCE with logits was chosen (instead of a standard BCE), as this loss combines a 
 
     self.loss_function = nn.BCEWithLogitsLoss()
 
-On top of that we decided to introduce **Teacher Forcing** (initially set up with a threshold of 0.5) in order to improve model skill and stability at training time.
-
-> Models that have recurrent connections from their outputs leading back into the model may be trained with teacher forcing.
-
-— Page 372, [Deep Learning](http://amzn.to/2wHImcR), 2016.
-
-In this way we were able to quickly and efficiently train our model that was using the ground truth from the prior time step as input.
-
-    def forward(self, x,y,teacher_forcing_ratio = 0.5):
-
-    	output, (hn, cn) = self.encoder(x)
-    
-      seq_len = y.shape[1]
-      outputs = torch.zeros(y.shape[0], seq_len, self.input_dim).to(device)
-      input = y[:,0,:].view(y.shape[0],1,y.shape[2])
-      for t in range(1, seq_len):
-          output, (hn, cn) = self.decoder(input, (hn, cn))
-          teacher_force = random.random() < teacher_forcing_ratio
-          shape = output.shape
-          x=output.unsqueeze(2)
-          x = self.classifier(x) 
-          x = x.view(shape[0],shape[1],-1)
-          output = (x > self.thr).float()
-          input = (y[:,t,:].view(y.shape[0],1,y.shape[2]) if teacher_force else output.view(y.shape[0],1,y.shape[2]))
-          outputs[:,t,:] = x.view(y.shape[0],-1)
-      return outputs
+### Focal Loss
 
 At this point we faced a problem, in which our loss was rapidly going below 0, due to the nature of the text, in which most of the times, 86-87 notes of the 88 available were easily guessed as not being played and having a value of 0.
 
@@ -467,10 +462,7 @@ As our model presented a similar problem, we decided to introduce Focal Loss wit
     Return:
     (tensor) focal loss.
     '''
-
-In this model we also introduced a new hyper parameter, brought by the BCE Loss function that expects a threshold value to be checked against the output when applying the Sigmoid function.
-
-    		x = x.view(-1,x.shape[2])
+        x = x.view(-1,x.shape[2])
         y = y.view(-1,y.shape[2])
     
         t = y.float()
@@ -479,9 +471,40 @@ In this model we also introduced a new hyper parameter, brought by the BCE Loss 
         pt = p*t + (1-p)*(1-t)         # pt = p if t > 0 else 1-p
         w = alpha*t + (1-alpha)*(1-t)  # w = alpha if t > 0 else 1-alpha
         w = w * (1-pt).pow(gamma)
+        
         return F.binary_cross_entropy_with_logits(x, t, w, reduction='sum')
 
-The last change we made to our system was to change the metrics on how we evaluate the training. Although this doesn't help on the results, it helps us better understand how the system evolves during training. In that regard we have stopped using accuracy as a metric since it quickly reaches 90% (most of the notes are silence in both target and prediction) and therefore, it doesn't orients us at all. Instead we've started using recall and precision (see graph bellow) which to better match the task and clearly show more understandable results. Another value that is worth monitoring while training is the "density" of the notes (how many notes would be held during the sequence divided by the whole sequence piano roll). This metric allows us to discard any system that, even while lowering the loss, doesn't manage to generate high enough levels of density, since our focus is on generation.
+### Teacher Forcing
+
+On top of that we decided to introduce **Teacher Forcing** (initially set up with a threshold of 0.5) in order to improve model skill and stability at training time.
+
+> Models that have recurrent connections from their outputs leading back into the model may be trained with teacher forcing.
+
+— Page 372, [Deep Learning](http://amzn.to/2wHImcR), 2016.
+
+In this way we were able to quickly and efficiently train our model that was using the ground truth from the prior time step as input.
+
+    def forward(self, x,y,teacher_forcing_ratio = 0.5):
+    	  output, (hn, cn) = self.encoder(x)
+    	
+    	  seq_len = y.shape[1]
+    	  outputs = torch.zeros(y.shape[0], seq_len, self.input_dim).to(device)
+    	  input = y[:,0,:].view(y.shape[0],1,y.shape[2])
+    	  for t in range(1, seq_len):
+    	      output, (hn, cn) = self.decoder(input, (hn, cn))
+    	      teacher_force = random.random() < teacher_forcing_ratio
+    	      shape = output.shape
+    	      x=output.unsqueeze(2)
+    	      x = self.classifier(x) 
+    	      x = x.view(shape[0],shape[1],-1)
+    	      output = (x > self.thr).float()
+    	      input = (y[:,t,:].view(y.shape[0],1,y.shape[2]) if teacher_force else output.view(y.shape[0],1,y.shape[2]))
+    	      outputs[:,t,:] = x.view(y.shape[0],-1)
+      return outputs
+
+### New evaluation metrics
+
+The last change we made to our system was to change the metrics on how we evaluate the training. Although this doesn't help on the results, it helps us better understand how the system evolves during training. In that regard we have stopped using accuracy as a metric since it quickly reaches over 90% (most of the piano roll states at each step are silenced in both target and prediction) and, therefore, it doesn't orient us at all. Instead, we've started using recall and precision (see graph bellow) which better match the task and clearly show more meaningful and understandable results. Another value that is worth monitoring while training is the "density" of the notes (how many notes would be held during the sequence divided by the whole sequence piano roll). This metric allows us to discard any system that, even while lowering the loss, doesn't manage to generate high enough levels of density, since our focus is on generation.
 
     def recall(self,x,y):
           x_pred = (x > self.thr).long() #where thr is 0 by default
@@ -495,7 +518,7 @@ The last change we made to our system was to change the metrics on how we evalua
 
 Results of Loss, Recall, Precission and Note density (a good value tends to be above 0.025, from training data)
 
-    0 3153.242187 0.00017379214114043862 0.5 7.3982e-06
+    0 3153.242187 0.000173 0.5 7.3982e-06
     1 3458.074707 0.0 nan 0.
     2 3163.663574 0.0 nan 0.
     3 3250.581298 0.006364 0.629032 0.0002
@@ -527,7 +550,7 @@ We can see that the results have improve substantially (even if only for the fac
 That being said, some extra improvements where introduced during training, that showed an improvement of the, at least, training results:
 
 - Modification of the alpha parameter of the focal loss (from 0.5 to 0.75) in order to weight more the well played notes instead of the well played silences. This reduces precision of the note selection but makes the system more aggressive and increases the "density" of the piano roll.
-- Dicreasing the Teacher forcing, with the Epochs during training. The system is capable of adapt better to the scenario of 0 teacher forcing (full predicting) if the teacher forcing gets diminished with time.
+- Decreasing the Teacher forcing with the Epochs during training. The system is capable of adapt better to the scenario of 0 teacher forcing (full predicting) if the teacher forcing gets diminished with time.
 - Variable learning rate in order to escape the local minima of the full silence score. We believe that the system has a local minima in a full silence score due to the important amount of notes that are not playing at any given time. By giving an initially larger learning rate (10^2),  the system seems to be able to escape that minima more easly at the beginning of training.
 
 ### Audio examples of the Final output
@@ -560,14 +583,18 @@ That being said, some extra improvements where introduced during training, that 
 
 What we could do to improve our latest model (4th Experiment):
 
-- Train with more and better Datasets
-- Improve Network Structure, Size, Training Hardware, More epochs (training time), etc.
+- Stop using numerical methods to evaluate our Network's performance:
+We should start sending online Surveys of the Musical qualities of our output results. This way we could measure if it is very far or close from passing the Turing test, on which Datasets does our model perform better, etc.
+- Train with more and better Datasets:
+The difficulty of this task depends heavily on the type and amount of training data. We should better explore how does our model perform with easier tasks (for example, training with hundreds of monophonic flute midi files). We should also train with bigger Datasets and different kinds of classical/modern composers.
+- Improve Network Architecture and complexity of the Model, Training Hardware, Review the results of a higher number of epochs for training (for example 200, 500, etc.)
 
-Other ways to expand our work:
+Other more ambitious paths to expand our work:
 
-- Add Attention
-- Transformer Models
+- Add Attention to our current Model
+- Explore Transformer Models and develop one
 - Explore the possibility of doing other tasks such as Musical Style transfer (Pokemon songs in the style of Bach, etc.) ...
+- Explore the possibility of creating a model capable of generating music for several instruments at the same time.
 
 # Bibliography and Related Works
 
